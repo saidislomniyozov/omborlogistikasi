@@ -146,6 +146,52 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
 
+        <!-- DIGITAL TWIN: REAL-TIME IOT TELEMETRIYA DATCHIKLARI PANELI -->
+        <div class="bg-slate-900/90 backdrop-blur rounded-2xl border border-slate-800 p-3.5 text-white shadow-xl flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="font-bold text-slate-200">IoT Digital Twin Telemetriya:</span>
+                <span class="text-[11px] text-slate-400 hidden sm:inline">&middot; Datchiklar onlayn</span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6 font-mono text-[11px]">
+                <!-- Harorat -->
+                <div class="flex items-center gap-1.5" title="Ichki harorat (Optimal: +15°C...+25°C)">
+                    <i data-lucide="thermometer" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span class="text-slate-400">Harorat:</span>
+                    <span id="iot-temp" class="font-bold text-emerald-400">18.4°C</span>
+                </div>
+
+                <!-- Namlik -->
+                <div class="flex items-center gap-1.5" title="Nisbiy namlik (Optimal: 40% - 60%)">
+                    <i data-lucide="droplets" class="w-3.5 h-3.5 text-sky-400"></i>
+                    <span class="text-slate-400">Namlik:</span>
+                    <span id="iot-humidity" class="font-bold text-sky-400">48%</span>
+                </div>
+
+                <!-- Havo sifati / Chang -->
+                <div class="flex items-center gap-1.5" title="Havo tozaligi (Changsiz pol topping)">
+                    <i data-lucide="wind" class="w-3.5 h-3.5 text-teal-400"></i>
+                    <span class="text-slate-400">AQI:</span>
+                    <span id="iot-aqi" class="font-bold text-teal-300">26 µg/m³</span>
+                </div>
+
+                <!-- Wi-Fi 6 -->
+                <div class="flex items-center gap-1.5" title="Sanoat Wi-Fi 6 WMS signali">
+                    <i data-lucide="wifi" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    <span class="text-slate-400">Wi-Fi 6:</span>
+                    <span id="iot-wifi" class="font-bold text-indigo-300">-52 dBm</span>
+                </div>
+
+                <!-- Quyosh Generatsiyasi -->
+                <div class="flex items-center gap-1.5" title="Quyosh PV quvvati">
+                    <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span class="text-slate-400">Solar:</span>
+                    <span id="iot-solar" class="font-bold text-amber-300">142 kVt</span>
+                </div>
+            </div>
+        </div>
+
         <!-- 1-BO'LIM: HERO VA UMUMIY KO'RSATKICHLAR -->
         <section id="umumiy-tavsif" class="space-y-6">
             <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white p-8 sm:p-10 border border-slate-800 shadow-2xl">
@@ -360,6 +406,9 @@
                                 <span class="pointer-events-auto cursor-pointer px-2 py-1 rounded bg-slate-800/90 text-slate-300 border border-slate-600 text-[11px] font-bold hover:bg-slate-700 transition" onclick="selectZone('admin')">
                                     Dispetcherlik & Zaryadlash
                                 </span>
+                                <span class="pointer-events-auto cursor-pointer px-2 py-1 rounded bg-teal-950/90 text-teal-300 border border-teal-500/50 text-[11px] font-bold hover:bg-teal-900 transition flex items-center gap-1" onclick="selectZone('rma')">
+                                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> RMA Servis & Qaytuv
+                                </span>
                             </div>
 
                             <!-- Yuklanish indikatori -->
@@ -471,19 +520,37 @@
 
                                 <!-- 5. Ma'muriy-Texnik -->
                                 <div id="btn-zone-admin" onclick="selectZone('admin')" 
-                                     class="zone-box col-span-12 bg-slate-800/90 hover:bg-slate-700/90 border-2 border-slate-600 rounded-xl p-3 text-white cursor-pointer flex items-center justify-between transition group">
+                                     class="zone-box col-span-12 sm:col-span-8 bg-slate-800/90 hover:bg-slate-700/90 border-2 border-slate-600 rounded-xl p-3 text-white cursor-pointer flex items-center justify-between transition group">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300">
                                             <i data-lucide="battery-charging" class="w-4 h-4"></i>
                                         </div>
                                         <div>
-                                            <h3 class="font-bold text-sm text-slate-100">Ma'muriy, Dispetcherlik va Texnik Zaryadlash Zonasi</h3>
-                                            <p class="text-xs text-slate-400">WMS Server xonasi, kiyinish xonasi, akkumulyator zaryadlash punkti</p>
+                                            <h3 class="font-bold text-sm text-slate-100">Ma'muriy, Dispetcherlik va Zaryadlash</h3>
+                                            <p class="text-[11px] text-slate-400">WMS Server xonasi, kiyinish va dam olish, batareya zaryadlash stansiyasi</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-xs font-semibold text-slate-300" id="map-admin-area">280 m²</span>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-600 text-slate-200">7%</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold text-slate-300" id="map-admin-area">200 m²</span>
+                                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-600 text-slate-200">5%</span>
+                                    </div>
+                                </div>
+
+                                <!-- 6. RMA / Reverse Logistics (Qaytuvlar & Kafolatli Servis) -->
+                                <div id="btn-zone-rma" onclick="selectZone('rma')" 
+                                     class="zone-box col-span-12 sm:col-span-4 bg-teal-950/80 hover:bg-teal-900 border-2 border-teal-500/60 rounded-xl p-3 text-white cursor-pointer flex items-center justify-between transition group">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-teal-800 flex items-center justify-center text-teal-200">
+                                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-xs text-teal-100">RMA Servis & Qaytuv</h3>
+                                            <p class="text-[10px] text-teal-300">Kafolatli diagnostika & qaytuv</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-semibold text-teal-200" id="map-rma-area">80 m²</span>
+                                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-800 text-teal-200">2%</span>
                                     </div>
                                 </div>
                             </div>
@@ -688,11 +755,51 @@
                         </div>
                         <p class="text-xs text-slate-500 mt-0.5">Ixtiyoriy WMS yacheyka manziliga bosing — 3D ombor kamerasi o'sha yacheykaga avtomatik yaqinlashadi va ko'rsatadi!</p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="exportSkuCsv()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1 shadow-sm" title="Jadvaldagi tovarlarni Excel/CSV formatida yuklab olish">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Excel (CSV)
+                        </button>
+                        <button onclick="toggleAddSkuForm()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition flex items-center gap-1 shadow-sm" title="Yangi tovar kiritish">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Yangi Tovar
+                        </button>
+                        <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
                         <button onclick="filterTable('all')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-white">Hammasi</button>
                         <button onclick="filterTable('A')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">A Guruhi</button>
                         <button onclick="filterTable('B')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">B Guruhi</button>
                         <button onclick="filterTable('C')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">C Guruhi</button>
+                    </div>
+                </div>
+
+                <!-- YANGI TOVAR QO'SHISH FORMASI (WMS SKU IMPORT) -->
+                <div id="add-sku-panel" class="hidden p-4 bg-blue-50/70 border-b border-blue-200 text-xs">
+                    <div class="font-bold text-slate-800 mb-2 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5 text-blue-900">
+                            <i data-lucide="package-plus" class="w-4 h-4 text-blue-600"></i>
+                            WMS Bazaga Yangi Tovar Qo'shish:
+                        </span>
+                        <button onclick="toggleAddSkuForm()" class="text-slate-400 hover:text-slate-600">&times; Yopish</button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-6 gap-2">
+                        <input id="new-sku-name" type="text" placeholder="Mahsulot nomi (masalan: Changyutgich Bosch)" class="sm:col-span-2 p-2 rounded-lg border border-slate-300 text-xs bg-white">
+                        <select id="new-sku-cat" class="p-2 rounded-lg border border-slate-300 text-xs bg-white">
+                            <option value="Mayda Texnika (SDA)">Mayda Texnika (SDA)</option>
+                            <option value="Katta Texnika (MDA)">Katta Texnika (MDA)</option>
+                            <option value="Audio-Video (CE)">Audio-Video (CE)</option>
+                            <option value="Iqlim (HVAC)">Iqlim (HVAC)</option>
+                        </select>
+                        <select id="new-sku-abc" class="p-2 rounded-lg border border-slate-300 text-xs bg-white">
+                            <option value="A">A Guruhi (80%)</option>
+                            <option value="B" selected>B Guruhi (15%)</option>
+                            <option value="C">C Guruhi (5%)</option>
+                        </select>
+                        <input id="new-sku-code" type="text" placeholder="Yacheyka (masalan: B-02-02-1)" class="p-2 rounded-lg border border-slate-300 text-xs font-mono bg-white">
+                        <input id="new-sku-sales" type="text" placeholder="Oylik sotuv (masalan: 320 dona)" class="p-2 rounded-lg border border-slate-300 text-xs bg-white">
+                    </div>
+                    <div class="flex justify-end gap-2 mt-2.5">
+                        <button onclick="toggleAddSkuForm()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-200">Bekor qilish</button>
+                        <button onclick="addNewSku()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1 shadow">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i> Bazaga Kiritish
+                        </button>
                     </div>
                 </div>
 
@@ -1191,6 +1298,31 @@
                         </button>
                     </div>
 
+                    <!-- MAVSUMIYLIK VA PIK STRESS-TEST -->
+                    <div class="p-3.5 rounded-xl bg-slate-900 text-white space-y-2.5">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold flex items-center gap-1.5 text-amber-300">
+                                <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i> Mavsumiylik & Pik Stress-Test:
+                            </span>
+                            <span id="stress-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Normal</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5 text-[11px]">
+                            <button id="stress-btn-normal" onclick="setSeasonalityMode('normal')" 
+                                    class="py-1.5 px-2 rounded-lg bg-blue-600 text-white text-center font-bold transition shadow">
+                                🟢 Standart (240)
+                            </button>
+                            <button id="stress-btn-summer" onclick="setSeasonalityMode('summer')" 
+                                    class="py-1.5 px-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-center font-semibold transition">
+                                🟡 Yozgi Pik (380)
+                            </button>
+                            <button id="stress-btn-peak" onclick="setSeasonalityMode('peak')" 
+                                    class="py-1.5 px-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-center font-semibold transition">
+                                🔴 Black Friday (550)
+                            </button>
+                        </div>
+                        <p id="stress-info-text" class="text-[11px] text-slate-400">Barqaror kunlik oqim: 2 smena, 11 ta fura, zaxira sig'imi 85%.</p>
+                    </div>
+
                     <div class="space-y-2">
                         <div class="flex justify-between items-center text-xs">
                             <label for="input-area" class="font-bold text-slate-700">Ombor Umumiy Maydoni (m²):</label>
@@ -1660,6 +1792,22 @@
                 staff: "3 nafar IT va ma'muriy dispetcher",
                 icon: "battery-charging",
                 colorClass: "slate"
+            },
+            rma: {
+                title: "Kafolatli Servis va Qaytuvlar Zonasi (RMA / Reverse Logistics)",
+                percent: "2%",
+                area: 80,
+                desc: "Mijozlardan qaytgan yoki servis talab etiladigan maishiy texnikani qabul qilish, ekspertiza diagnostikasi, qayta qadoqlash yoki ishlab chiqaruvchi servislariga yo'naltirish maydoni.",
+                equipment: [
+                    "Texnik diagnostika va sinov stendlari",
+                    "RMA shtrix-kod va nuqson akti generatori",
+                    "Antistatik qadoqlash va ehtiyot qismlar tokchasi",
+                    "Qayta saralash va izolyatsiya maydonchasi"
+                ],
+                throughput: "Oylik yuklarning 3-5% qaytuv oqimi",
+                staff: "2 nafar servis-muhandis va qabulchi",
+                icon: "refresh-cw",
+                colorClass: "teal"
             }
         };
 
@@ -1829,7 +1977,13 @@
             createZonePlane(0, 3, 44, 34, 0x4f46e5, 0.15, "Saqlash");
             createZonePlane(35, 6, 24, 18, 0xf59e0b, 0.18, "Yig'ish");
             createZonePlane(35, -12, 24, 16, 0xe11d48, 0.18, "Jo'natish");
-            createZonePlane(-35, 12, 24, 12, 0x64748b, 0.25, "Admin");
+            createZonePlane(-37, 12, 14, 12, 0x64748b, 0.25, "Admin");
+            createZonePlane(-22, 12, 10, 12, 0x0d9488, 0.32, "RMA Servis");
+
+            // RMA Servis stoli
+            const rmaTable = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.2, 1.8), new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.4 }));
+            rmaTable.position.set(-22, 0.6, 12);
+            scene3D.add(rmaTable);
 
             const wallMat = new THREE.MeshPhysicalMaterial({
                 color: 0x38bdf8,
@@ -2123,14 +2277,18 @@
             scene3D.add(truckGroup);
         }
 
+        let dynamicReachTruck = null;
+        let dynamicForkCarriage = null;
+
         function buildHandlingEquipment() {
-            buildForklift(-3, 0, 0, 0xfacc15, 8);
-            buildForklift(10, 0, 5, 0xfacc15, 4);
+            // A-Qator bo'ylab harakatlanuvchi jonli Reach-truck
+            dynamicReachTruck = buildForklift(-11, 0, -2, 0xfacc15, 9.5, true);
+            buildForklift(10, 0, 5, 0xfacc15, 6);
             buildForklift(-34, 0, -12, 0xea580c, 2.5);
             buildForklift(36, 0, -6, 0x0284c7, 2);
         }
 
-        function buildForklift(x, y, z, color, mastHeight) {
+        function buildForklift(x, y, z, color, mastHeight, isDynamic = false) {
             const fg = new THREE.Group();
             const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.4, 2.2), new THREE.MeshStandardMaterial({ color: color }));
             body.position.set(0, 0.9, 0);
@@ -2144,14 +2302,22 @@
             mast.position.set(0, mastHeight / 2, 1.2);
             fg.add(mast);
 
+            const carriage = new THREE.Group();
             const pal = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.12, 1.2), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
-            pal.position.set(0, 1.2, 1.9);
+            pal.position.set(0, 0, 1.9);
             const box = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: 0x38bdf8 }));
-            box.position.set(0, 1.8, 1.9);
-            fg.add(pal, box);
+            box.position.set(0, 0.6, 1.9);
+            carriage.add(pal, box);
+            carriage.position.y = 1.2;
+            fg.add(carriage);
+
+            if (isDynamic) {
+                dynamicForkCarriage = carriage;
+            }
 
             fg.position.set(x, y, z);
             scene3D.add(fg);
+            return fg;
         }
 
         function buildUFlowPath() {
@@ -2310,6 +2476,15 @@
                 p.mesh.position.copy(pos);
             });
 
+            // Dinamik Reach-truck harakati va vilkani ko'tarish kinematikasi
+            if (dynamicReachTruck) {
+                const t = Date.now() * 0.001;
+                dynamicReachTruck.position.z = -1 + Math.sin(t * 0.8) * 8.5;
+                if (dynamicForkCarriage) {
+                    dynamicForkCarriage.position.y = 1.0 + Math.abs(Math.sin(t * 1.3)) * 5.2;
+                }
+            }
+
             // Agar yacheyka tanlangan bo'lsa, konus tebranadi
             if (cellHighlightGroup) {
                 const cone = cellHighlightGroup.children[2];
@@ -2392,6 +2567,9 @@
             } else if (key === 'admin') {
                 camera3D.position.set(-50, 25, 40);
                 controls3D.target.set(-35, 2, 12);
+            } else if (key === 'rma') {
+                camera3D.position.set(-38, 20, 32);
+                controls3D.target.set(-22, 1.5, 12);
             }
             controls3D.update();
         }
@@ -2787,6 +2965,124 @@
             const costPerPallet = (totalMonthly / 3400).toFixed(2);
             document.getElementById('cost-per-pallet').innerText = `$${costPerPallet} / oy`;
         }
+
+        // ==========================================
+        // 5. MAVSUMIYLIK VA PIK STRESS-TEST BOSHQARUVI
+        // ==========================================
+        function setSeasonalityMode(mode) {
+            const flowInput = document.getElementById('input-flow');
+            const badge = document.getElementById('stress-badge');
+            const infoText = document.getElementById('stress-info-text');
+            const bNorm = document.getElementById('stress-btn-normal');
+            const bSum = document.getElementById('stress-btn-summer');
+            const bPeak = document.getElementById('stress-btn-peak');
+
+            [bNorm, bSum, bPeak].forEach(b => {
+                b.className = "py-1.5 px-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-center font-semibold transition";
+            });
+
+            if (mode === 'summer') {
+                flowInput.value = 380;
+                badge.innerText = "Yozgi Pik (380 pallet)";
+                badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40";
+                bSum.className = "py-1.5 px-2 rounded-lg bg-amber-600 text-white text-center font-bold transition shadow";
+                infoText.innerText = "Yozgi mavsumiy pik: Konditsioner & muzlatkichlar oqimi +58%, yuklama 92%, 16 fura/kun.";
+            } else if (mode === 'peak') {
+                flowInput.value = 550;
+                badge.innerText = "Black Friday Pik (550 pallet)";
+                badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40";
+                bPeak.className = "py-1.5 px-2 rounded-lg bg-rose-600 text-white text-center font-bold transition shadow";
+                infoText.innerText = "Maksimal stress-test: 3-smena faol, 24 fura/kun, bufer sig'im 98% ga to'ldi, barcha 8 dok to'liq band!";
+            } else {
+                flowInput.value = 240;
+                badge.innerText = "Normal (240 pallet)";
+                badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+                bNorm.className = "py-1.5 px-2 rounded-lg bg-blue-600 text-white text-center font-bold transition shadow";
+                infoText.innerText = "Barqaror kunlik oqim: 2 smena, 11 ta fura, zaxira sig'imi 85%.";
+            }
+            calculateWarehouse();
+        }
+
+        // ==========================================
+        // 6. EXCEL (CSV) EKSPORT VA SKU QO'SHISH
+        // ==========================================
+        function exportSkuCsv() {
+            let csvContent = "\uFEFFMahsulot Nomi,Kategoriya,ABC Guruh,XYZ Guruh,WMS Yacheyka,Joylashuv Zonasi,Oylik Sotuv\r\n";
+            skuDatabase.forEach(item => {
+                csvContent += `"${item.name}","${item.cat}","${item.abc}","${item.xyz}","${item.code}","${item.zone}","${item.sales}"\r\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "TexnoLogistik_WMS_SKU_Bazasi.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function toggleAddSkuForm() {
+            const panel = document.getElementById('add-sku-panel');
+            if (panel) panel.classList.toggle('hidden');
+        }
+
+        function addNewSku() {
+            const name = document.getElementById('new-sku-name').value.trim();
+            const cat = document.getElementById('new-sku-cat').value;
+            const abc = document.getElementById('new-sku-abc').value;
+            const code = document.getElementById('new-sku-code').value.trim() || 'B-02-02-1';
+            const sales = document.getElementById('new-sku-sales').value.trim() || '250 dona';
+
+            if (!name) {
+                alert("Iltimos, mahsulot nomini kiriting!");
+                return;
+            }
+
+            const xyz = (abc === 'A') ? 'X' : (abc === 'B' ? 'Y' : 'Z');
+            const zone = (abc === 'A') ? 'Oltin zona (1-yarus)' : (abc === 'B' ? 'Markaziy (2-yarus)' : 'To\'r / 4-yarus');
+
+            skuDatabase.unshift({ name, cat, abc, xyz, code, zone, sales });
+            renderSkuTable();
+            toggleAddSkuForm();
+
+            document.getElementById('new-sku-name').value = '';
+            document.getElementById('new-sku-code').value = '';
+            document.getElementById('new-sku-sales').value = '';
+        }
+
+        // ==========================================
+        // 7. DIGITAL TWIN IOT TELEMETRIYA DATCHIKLARI
+        // ==========================================
+        function updateIotTelemetry() {
+            const tempEl = document.getElementById('iot-temp');
+            const humEl = document.getElementById('iot-humidity');
+            const aqiEl = document.getElementById('iot-aqi');
+            const wifiEl = document.getElementById('iot-wifi');
+            const solarEl = document.getElementById('iot-solar');
+
+            if (tempEl) {
+                const temp = (18.2 + Math.random() * 0.5).toFixed(1);
+                tempEl.innerText = `${temp}°C`;
+            }
+            if (humEl) {
+                const hum = Math.round(47 + Math.random() * 3);
+                humEl.innerText = `${hum}%`;
+            }
+            if (aqiEl) {
+                const aqi = Math.round(25 + Math.random() * 4);
+                aqiEl.innerText = `${aqi} µg/m³`;
+            }
+            if (wifiEl) {
+                const wifi = Math.round(-51 - Math.random() * 3);
+                wifiEl.innerText = `${wifi} dBm`;
+            }
+            if (solarEl) {
+                const solar = Math.round(140 + Math.random() * 6);
+                solarEl.innerText = `${solar} kVt`;
+            }
+        }
+        setInterval(updateIotTelemetry, 3500);
 
         // Dasturni ishga tushirish
         window.addEventListener('DOMContentLoaded', () => {

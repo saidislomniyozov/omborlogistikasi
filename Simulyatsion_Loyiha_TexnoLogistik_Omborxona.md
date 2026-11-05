@@ -408,6 +408,21 @@ Tovar oqimining tezligiga mos ravishda ombor javonlari issiqlik xaritasi (Heatma
    - MHE lizingi va WMS IT litsenziyalari: \$1.45 / m²
    - **Jami 1 m² oylik tannarxi: \$11.00 / m²** (Jami oylik OPEX: \$44,000 / oy; bitta pallet oylik saqlash xarajati: **\$12.94 / pallet**).
 
+### 7.7. Qaytuvchi Logistika (Reverse Logistics va RMA Maydoni)
+Maishiy texnika distribyutsiyasida kafolatli qaytuvlar va servisga murojaatlar o'rtacha 3.5% ni tashkil qiladi. Loyihada Dok 1 yonida 80 m² lik **RMA (Return Merchandise Authorization)** diagnostika va servis maydonchasi tashkil etildi:
+- Tovar qaytganda uning seriya raqami va nuqson akti WMS tizimiga kiritiladi;
+- Diagnostika stendlarida tekshirilib, mayda nosozliklar joyida bartaraf etiladi yoki ishlab chiqaruvchi servis markaziga yo'naltiriladi;
+- Qayta qadoqlangan tovarlar maxsus chegirma (outlet/refurbished) toifasiga o'tkazilib, ombor aylanmasiga qaytariladi.
+
+### 7.8. Mavsumiylik va Pik Davrlari (Stress-Test Tahlili)
+Taqsimot markazi ish faoliyati uch xil yuklama rejimida sinovdan o'tkazildi:
+1. **Standart rejim (240 pallet/kun, 11 ta fura)**: 2 smena, quvvat bandligi 85%, oqim barqaror;
+2. **Yozgi pik rejimi — HVAC & Sovutkichlar (380 pallet/kun, 16 ta fura)**: Mavsumiy tovarlar bufer maydonlariga o'tkaziladi, rampa quvvati 92% gacha ishlaydi;
+3. **Qishki savdo piki — Black Friday / Yangi Yil (550 pallet/kun, 24 ta fura)**: 3-smenali uzluksiz ish rejimi joriy etiladi, barcha 8 ta dok to'liq ishga tushadi, quvvat zaxirasi 98% ga yetadi.
+
+### 7.9. "Digital Twin" IoT Telemetriya va Datchiklar Tarmog'i
+Omborda real-vaqt rejimida harorat ($+18.4^\circ\text{C}$), nisbiy namlik ($48\%$), havo tozaligi indekslari (AQI: $26\ \mu\text{g/m}^3$) hamda sanoat Wi-Fi 6 WMS signali ($-52\text{ dBm}$) uzluksiz telemetriya orqali monitoring qilinadi. Bu elektronika tovarlarining sifatli saqlanishini va MHE texnikalarining to'xtovsiz aloqasini kafolatlaydi.
+
 ### Yakuniy xulosalar:
 1. Ishlab chiqilgan loyiha "TexnoLogistik" MChJ korxonasiga maishiy texnika va uy-ro'zg'or buyumlari distribyutsiyasida logistika zanjirining o'tkazuvchanlik qobiliyatini sutkasiga 312 palletgacha oshirish imkonini beradi.
 2. U-shaklidagi tovar oqimi va ABC-XYZ integratsiyasi ombor ichidagi transport traektoriyasini 41.6% ga qisqartirdi hamda qarama-qarshi oqimlar to'qnashuvini to'liq bartaraf etdi.
