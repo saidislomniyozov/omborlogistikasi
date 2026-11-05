@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="uz" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TexnoLogistik MChJ — Omborxona Logistikasi Simulyatsion Tizimi (2D & 3D)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Three.js va OrbitControls (3D Vizualizatsiya uchun) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#082f49',
+                            dark: '#0f172a'
+                        },
+                        logistics: {
+                            green: '#10b981',
+                            emerald: '#059669',
+                            amber: '#f59e0b',
+                            blue: '#2563eb',
+                            purple: '#7c3aed',
+                            rose: '#e11d48'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .zone-box {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .zone-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15);
+        }
+        #warehouse-3d-canvas {
+            outline: none;
+            cursor: grab;
+        }
+        #warehouse-3d-canvas:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- YUQORI NAVIGATSIYA PANELİ -->
+    <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-white shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logotip va korxona nomi -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <i data-lucide="boxes" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-blue-300 bg-clip-text text-transparent">TexnoLogistik MChJ</span>
+                            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2D & 3D A Toifa</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Regional Taqsimot Markazi Logistikasi</p>
+                    </div>
+                </div>
+
+                <!-- Menyu havolalari -->
+                <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium text-slate-300">
+                    <a href="#umumiy-tavsif" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/80 transition">Tavsif</a>
+                    <a href="#ombor-sxemasi" class="px-3 py-1.5 rounded-lg text-blue-400 bg-slate-800/80 font-bold hover:text-white transition flex items-center gap-1.5">
+                        <i data-lucide="box" class="w-4 h-4"></i> Ombor Sxemasi (2D/3D)
+                    </a>
+                    <a href="#abc-xyz-tahlil" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/80 transition">ABC-XYZ</a>
+                    <a href="#jihozlar-wms" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/80 transition">Jihozlar & WMS</a>
+                    <a href="#jonli-kalkulyator" class="px-3 py-1.5 rounded-lg bg-blue-600/30 text-blue-300 border border-blue-500/40 hover:bg-blue-600 hover:text-white transition flex items-center gap-1.5">
+                        <i data-lucide="calculator" class="w-4 h-4"></i> Kalkulyator
+                    </a>
+                    <a href="#kpi-dashboard" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/80 transition">KPI</a>
+                </nav>
+
+                <!-- Status belgisi va tezkor tugma -->
+                <div class="flex items-center space-x-3">
+                    <div class="hidden sm:flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-slate-300">WebGL 3D Faol</span>
+                    </div>
+                    <button onclick="window.print()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Hisobotni chop etish / PDF">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- 1-BO'LIM: HERO VA UMUMIY KO'RSATKICHLAR -->
+        <section id="umumiy-tavsif" class="space-y-6">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-white p-8 sm:p-10 border border-slate-800 shadow-2xl">
+                <div class="absolute -right-20 -top-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="relative z-10 max-w-3xl space-y-4">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span>Akademik Simulyatsion Loyiha &middot; 2D & 3D Boshqaruv</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                        Maishiy Texnika Taqsimot Markazi Boshqaruvi
+                    </h1>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        "TexnoLogistik" MChJ ning 4,000 m² maydondagi zamonaviy "A" toifali omborxonasi. Tovar oqimlarini U-simon (U-flow) yo'naltirish, ABC-XYZ slotting tahlili, WMS boshqaruvi hamda interaktiv 2D/3D fazoviy vizualizatsiyasi.
+                    </p>
+
+                    <div class="pt-2 flex flex-wrap gap-3 text-xs text-slate-300">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800/80 border border-slate-700">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i> Toshkent viloyati, THAY & M39 tuguni
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800/80 border border-slate-700">
+                            <i data-lucide="box" class="w-3.5 h-3.5 text-blue-400"></i> Interaktiv 3D Stellajlar va Yuk Mashinalari
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800/80 border border-slate-700">
+                            <i data-lucide="cpu" class="w-3.5 h-3.5 text-emerald-400"></i> WMS & RFID Avtomatlashtirilgan
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asosiy 4 ta Metrika Kartasi -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="glass-panel p-5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-blue-400 transition group">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Umumiy Maydon</span>
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition">
+                            <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900" id="card-total-area">4,000 <span class="text-lg font-semibold text-slate-500">m²</span></div>
+                    <p class="text-xs text-slate-500 mt-1">Shift balandligi: 11.5 m | Hajm: 46,000 m³</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-emerald-400 transition group">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Pallet Sig'imi</span>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition">
+                            <i data-lucide="package-check" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900" id="card-capacity">3,400 <span class="text-lg font-semibold text-slate-500">o'rin</span></div>
+                    <p class="text-xs text-slate-500 mt-1">5 yarusli frontal va polli blokli saqlash</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-amber-400 transition group">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Kunlik Yuk Aylanmasi</span>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition">
+                            <i data-lucide="truck" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900" id="card-daily-flow">120 - 156 <span class="text-lg font-semibold text-slate-500">t/kun</span></div>
+                    <p class="text-xs text-slate-500 mt-1">240 - 312 pallet/kun (11 ta og'ir fura)</p>
+                </div>
+
+                <div class="glass-panel p-5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-purple-400 transition group">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Shtat va MHE Parki</span>
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-900">31 <span class="text-lg font-semibold text-slate-500">xodim</span></div>
+                    <p class="text-xs text-slate-500 mt-1">8 ta elektro-texnika (Reach-truck, Forklift)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2-BO'LIM: OMBOR SXEMASI — 2D VA 3D INTERAKTIV VIZUALIZATSIYA -->
+        <section id="ombor-sxemasi" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                        <i data-lucide="map" class="w-6 h-6 text-blue-600"></i>
+                        Ombor Zonalari: 2D Planimetriya va 3D Fazoviy Model
+                    </h2>
+                    <p class="text-sm text-slate-500">Siz omborni 2D chizma va to'liq 360° aylanuvchi interaktiv 3D maket ko'rinishida ko'rishingiz mumkin.</p>
+                </div>
+
+                <!-- 2D / 3D / YONMA-YON REJIM ALMASHTIRGICHI -->
+                <div class="flex items-center p-1 bg-slate-200/80 rounded-xl text-xs font-bold shadow-inner">
+                    <button id="view-mode-2d" onclick="setViewMode('2d')" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+                        2D Plan
+                    </button>
+                    <button id="view-mode-3d" onclick="setViewMode('3d')" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow transition flex items-center gap-1.5">
+                        <i data-lucide="box" class="w-3.5 h-3.5"></i> 3D Model
+                    </button>
+                    <button id="view-mode-split" onclick="setViewMode('split')" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+                        <i data-lucide="columns-2" class="w-3.5 h-3.5"></i> 2D + 3D Birga
+                    </button>
+                </div>
+            </div>
+
+            <!-- Asosiy Sxema Maydoni va O'ngdagi Panel -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Sxemalar Konteyneri (8 ustun) -->
+                <div class="lg:col-span-8 space-y-4">
+
+                    <!-- 3D MODEL KONTEYNERI -->
+                    <div id="container-3d-view" class="bg-slate-950 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 shadow-xl space-y-3 relative overflow-hidden">
+                        <!-- 3D Boshqaruv Yuqori Paneli -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs border-b border-slate-800 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> 3D WebGL Fazosi
+                                </span>
+                                <span class="text-slate-400 hidden sm:inline text-[11px]">Sichqoncha bilan aylantiring &middot; Skroll orqali yaqinlashtiring</span>
+                            </div>
+
+                            <!-- Kamera Rakurslari Tugmalari -->
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="setCameraView('iso')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition font-semibold" title="Izometrik burchak">
+                                    🎥 Izometriya
+                                </button>
+                                <button onclick="setCameraView('top')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition font-semibold" title="Yuqoridan ko'rish">
+                                    🔝 Yuqoridan
+                                </button>
+                                <button onclick="setCameraView('docks')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition font-semibold" title="Rampa va furalar">
+                                    🚛 Rampa
+                                </button>
+                                <button onclick="setCameraView('racks')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition font-semibold" title="Stellajlar ichi">
+                                    📦 Stellajlar
+                                </button>
+                                <button id="btn-toggle-rotate" onclick="toggleAutoRotate()" class="p-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white transition" title="Avto-aylanish">
+                                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Three.js Canvas Maydoni -->
+                        <div class="relative w-full h-[380px] sm:h-[420px] rounded-xl overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-800">
+                            <canvas id="warehouse-3d-canvas" class="w-full h-full block"></canvas>
+
+                            <!-- 3D ichidagi Jonli Hudud Markerlari -->
+                            <div class="absolute bottom-3 left-3 right-3 flex flex-wrap gap-2 pointer-events-none">
+                                <span class="pointer-events-auto cursor-pointer px-2 py-1 rounded bg-sky-950/90 text-sky-300 border border-sky-500/50 text-[11px] font-bold hover:bg-sky-900 transition" onclick="selectZone('receiving')">
+                                    Dok 1-4 (Qabul)
+                                </span>
+                                <span class="pointer-events-auto cursor-pointer px-2 py-1 rounded bg-indigo-950/90 text-indigo-300 border border-indigo-500/50 text-[11px] font-bold hover:bg-indigo-900 transition" onclick="selectZone('storage')">
+                                    5 Yarusli Stellajlar (Saqlash)
+                                </span>
+                                <span class="pointer-events-auto cursor-pointer px-2 py-1 rounded bg-amber-950/90 text-amber-300 border border-amber-500/50 text-[11px] font-bold hover:bg-amber-900 transition" onclick="selectZone('picking')">
+                                    Butlash (Picking)
+                                </span>
+                                <span class="pointer-events-auto cursor-pointer px-2 py-1 rounded bg-rose-950/90 text-rose-300 border border-rose-500/50 text-[11px] font-bold hover:bg-rose-900 transition" onclick="selectZone('shipping')">
+                                    Dok 5-8 (Jo'natish)
+                                </span>
+                                <span class="pointer-events-auto cursor-pointer px-2 py-1 rounded bg-slate-800/90 text-slate-300 border border-slate-600 text-[11px] font-bold hover:bg-slate-700 transition" onclick="selectZone('admin')">
+                                    Dispetcherlik & Zaryadlash
+                                </span>
+                            </div>
+
+                            <!-- Yuklanish indikatori -->
+                            <div id="3d-loading-overlay" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center text-white space-y-2 pointer-events-none transition duration-500">
+                                <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                <span class="text-xs font-semibold text-slate-300">3D Ombor Muhiti Yuklanmoqda...</span>
+                            </div>
+                        </div>
+
+                        <!-- 3D ostidagi ma'lumot qatori -->
+                        <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                            <span>✨ Real masshtab: 100 m &times; 40 m &times; 11.5 m balandlik</span>
+                            <span class="text-emerald-400 font-semibold flex items-center gap-1">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> U-shaklidagi neon oqim animatsiyasi faol
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 2D INTERAKTIV SXEMA (KLASSIK REJIM) -->
+                    <div id="container-2d-view" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-500 border-b border-slate-100 pb-3">
+                            <span class="font-semibold text-slate-700">2D Planimetriya: 100 m &times; 40 m (Balandligi: 11.5 m)</span>
+                            <span class="flex items-center gap-1.5 text-blue-600 font-medium">
+                                <span class="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span> Zonani tanlash uchun bosing
+                            </span>
+                        </div>
+
+                        <!-- 2D Sxema Maydoni -->
+                        <div class="relative bg-slate-900 p-4 rounded-xl overflow-hidden border-2 border-slate-700">
+                            <div class="text-[11px] text-slate-400 font-mono flex items-center justify-between mb-2">
+                                <span>DOKLAR FRONTI (RAMPA) &darr;</span>
+                                <span class="text-emerald-400 font-bold">&larr; U-SHAKLIDAGI TOVAR OQIMI &rarr;</span>
+                                <span>EXPEDITION &uarr;</span>
+                            </div>
+
+                            <div class="grid grid-cols-12 gap-3 min-h-[340px]">
+                                <!-- 1. Qabul Qilish -->
+                                <div id="btn-zone-receiving" onclick="selectZone('receiving')" 
+                                     class="zone-box col-span-3 bg-sky-950/80 hover:bg-sky-900 border-2 border-sky-500/60 rounded-xl p-3 text-white cursor-pointer flex flex-col justify-between transition group">
+                                    <div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30">12%</span>
+                                            <i data-lucide="download" class="w-4 h-4 text-sky-400 group-hover:scale-110 transition"></i>
+                                        </div>
+                                        <h3 class="font-bold text-sm text-sky-100 mt-2">Qabul Qilish</h3>
+                                        <p class="text-xs text-sky-300 font-medium" id="map-receiving-area">480 m²</p>
+                                    </div>
+                                    <div class="text-[10px] text-sky-200/80 bg-sky-900/60 p-2 rounded-lg border border-sky-800">
+                                        Dok 1 — 4 | Vizual & GS1 shtrix-kod nazorati
+                                    </div>
+                                </div>
+
+                                <!-- 2. Asosiy Saqlash -->
+                                <div id="btn-zone-storage" onclick="selectZone('storage')" 
+                                     class="zone-box col-span-6 bg-indigo-950/80 hover:bg-indigo-900 border-2 border-indigo-500/60 rounded-xl p-3 text-white cursor-pointer flex flex-col justify-between transition group ring-2 ring-indigo-400/40">
+                                    <div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">55%</span>
+                                            <i data-lucide="layers" class="w-4 h-4 text-indigo-400 group-hover:scale-110 transition"></i>
+                                        </div>
+                                        <h3 class="font-bold text-sm text-indigo-100 mt-2">Asosiy Saqlash Zonasi</h3>
+                                        <p class="text-xs text-indigo-300 font-medium" id="map-storage-area">2,200 m²</p>
+                                    </div>
+                                    <div class="space-y-1 my-2">
+                                        <div class="grid grid-cols-4 gap-1.5 py-1">
+                                            <div class="h-6 rounded bg-indigo-800/80 border border-indigo-600/50 flex items-center justify-center text-[9px] text-indigo-200">A-Qator</div>
+                                            <div class="h-6 rounded bg-indigo-800/80 border border-indigo-600/50 flex items-center justify-center text-[9px] text-indigo-200">B-Qator</div>
+                                            <div class="h-6 rounded bg-indigo-800/80 border border-indigo-600/50 flex items-center justify-center text-[9px] text-indigo-200">C-Qator</div>
+                                            <div class="h-6 rounded bg-indigo-800/80 border border-indigo-600/50 flex items-center justify-center text-[9px] text-indigo-200">Polli/MDA</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-[10px] text-indigo-200/80 bg-indigo-900/60 p-2 rounded-lg border border-indigo-800">
+                                        Frontal 5 yarusli stelajlar &middot; Sig'im: 3,400 pallet o'rni
+                                    </div>
+                                </div>
+
+                                <!-- 3 & 4. Yig'ish va Jo'natish -->
+                                <div class="col-span-3 flex flex-col gap-3">
+                                    <div id="btn-zone-picking" onclick="selectZone('picking')" 
+                                         class="zone-box flex-1 bg-amber-950/80 hover:bg-amber-900 border-2 border-amber-500/60 rounded-xl p-3 text-white cursor-pointer flex flex-col justify-between transition group">
+                                        <div>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">15%</span>
+                                                <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400 group-hover:scale-110 transition"></i>
+                                            </div>
+                                            <h3 class="font-bold text-sm text-amber-100 mt-1">Buyurtma Butlash</h3>
+                                            <p class="text-xs text-amber-300 font-medium" id="map-picking-area">600 m²</p>
+                                        </div>
+                                        <div class="text-[10px] text-amber-200/80">
+                                            Gravitatsion tokchalar & Pick-by-Voice
+                                        </div>
+                                    </div>
+
+                                    <div id="btn-zone-shipping" onclick="selectZone('shipping')" 
+                                         class="zone-box flex-1 bg-rose-950/80 hover:bg-rose-900 border-2 border-rose-500/60 rounded-xl p-3 text-white cursor-pointer flex flex-col justify-between transition group">
+                                        <div>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-400/30">11%</span>
+                                                <i data-lucide="upload" class="w-4 h-4 text-rose-400 group-hover:scale-110 transition"></i>
+                                            </div>
+                                            <h3 class="font-bold text-sm text-rose-100 mt-1">Jo'natish & Ekspeditsiya</h3>
+                                            <p class="text-xs text-rose-300 font-medium" id="map-shipping-area">440 m²</p>
+                                        </div>
+                                        <div class="text-[10px] text-rose-200/80">
+                                            Dok 5 — 8 | Staging Lanes
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 5. Ma'muriy-Texnik -->
+                                <div id="btn-zone-admin" onclick="selectZone('admin')" 
+                                     class="zone-box col-span-12 bg-slate-800/90 hover:bg-slate-700/90 border-2 border-slate-600 rounded-xl p-3 text-white cursor-pointer flex items-center justify-between transition group">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300">
+                                            <i data-lucide="battery-charging" class="w-4 h-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-sm text-slate-100">Ma'muriy, Dispetcherlik va Texnik Zaryadlash Zonasi</h3>
+                                            <p class="text-xs text-slate-400">WMS Server xonasi, kiyinish xonasi, akkumulyator zaryadlash punkti</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs font-semibold text-slate-300" id="map-admin-area">280 m²</span>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-600 text-slate-200">7%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Afzalliklar qatori -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs text-slate-600">
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+                                <span>Oqimlar kesishmaydi (Nol avariya)</span>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+                                <span>Fura manevr maydoni 45% tejaladi</span>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+                                <span>Texnikani tezkor qayta taqsimlash</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tanlangan Zona Tafsilotlari Paneli (4 ustun) -->
+                <div class="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">ZONA TAVSIFI</span>
+                            <span id="detail-zone-percent" class="text-xs font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">55%</span>
+                        </div>
+
+                        <div class="mt-4 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div id="detail-zone-icon-bg" class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                    <i id="detail-zone-icon" data-lucide="layers" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h3 id="detail-zone-title" class="text-lg font-bold text-slate-900">Asosiy Saqlash Zonasi</h3>
+                                    <p id="detail-zone-area" class="text-sm font-semibold text-slate-500">2,200 m² (Foydali sig'im)</p>
+                                </div>
+                            </div>
+
+                            <p id="detail-zone-desc" class="text-sm text-slate-600 leading-relaxed">
+                                Mahsulotlarni qisqa va o'rta muddatli saqlash uchun mo'ljallangan. 5 yarusli frontal stellajlar (1,750 m²) va muzlatgichlar uchun polli blok saqlash (450 m²) hududini o'z ichiga oladi.
+                            </p>
+
+                            <div class="space-y-2.5 pt-2">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">TEXNOLOGIK JIHOZLAR:</h4>
+                                <ul id="detail-zone-equipment" class="text-xs text-slate-600 space-y-1.5 list-disc list-inside">
+                                    <li>Frontal selektiv stellajlar (3,400 pallet o'rni)</li>
+                                    <li>3 ta elektr Reach-truck (10.5 m ko'tarish)</li>
+                                    <li>Dinamik yacheykali manzil (Barcode Address)</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">O'tkazuvchanlik:</span>
+                                    <span id="detail-zone-throughput" class="font-bold text-slate-800">240 - 312 pallet/kun</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Mas'ul xodimlar:</span>
+                                    <span id="detail-zone-staff" class="font-bold text-slate-800">8 nafar operator</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Donut Grafik -->
+                    <div class="pt-4 border-t border-slate-100">
+                        <span class="text-xs font-semibold text-slate-500 block mb-2">Maydonlar Balansi Ulushi:</span>
+                        <div class="h-36">
+                            <canvas id="zoneChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3-BO'LIM: ABC VA XYZ TAHLILI -->
+        <section id="abc-xyz-tahlil" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-6 h-6 text-emerald-600"></i>
+                        ABC va XYZ Tahlili (Slotting Strategiyasi)
+                    </h2>
+                    <p class="text-sm text-slate-500">Vilfredo Pareto qoidasi va talabning variatsiya koeffitsiyenti bo'yicha tovarlarni to'g'ri joylashtirish.</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">A guruhi: 80% Aylanma</span>
+                    <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-bold">X guruhi: Barqaror talab</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- 9 Katakli Matritsa (7 ustun) -->
+                <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-base text-slate-900">9 Segmentli ABC-XYZ Integratsiyalashgan Matritsasi</h3>
+                        <span class="text-xs text-slate-400">Segmentni tanlab tovarlarni ko'ring</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div class="text-xs font-extrabold text-slate-500 uppercase pb-1">X (v &le; 10%)</div>
+                        <div class="text-xs font-extrabold text-slate-500 uppercase pb-1">Y (10% &lt; v &le; 25%)</div>
+                        <div class="text-xs font-extrabold text-slate-500 uppercase pb-1">Z (v &gt; 25%)</div>
+
+                        <div onclick="showMatrixDetail('AX')" class="p-3.5 rounded-xl bg-emerald-500 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">AX</div>
+                            <div class="text-[11px] font-semibold opacity-90">"Oltin Zona"</div>
+                            <div class="text-[10px] mt-1 opacity-75">Doklarga eng yaqin</div>
+                        </div>
+                        <div onclick="showMatrixDetail('AY')" class="p-3.5 rounded-xl bg-emerald-600 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">AY</div>
+                            <div class="text-[11px] font-semibold opacity-90">Mavsumiy Pik</div>
+                            <div class="text-[10px] mt-1 opacity-75">Quyi yaruslar</div>
+                        </div>
+                        <div onclick="showMatrixDetail('AZ')" class="p-3.5 rounded-xl bg-emerald-700 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">AZ</div>
+                            <div class="text-[11px] font-semibold opacity-90">Yuqori Tebranish</div>
+                            <div class="text-[10px] mt-1 opacity-75">Zaxira nazorati</div>
+                        </div>
+
+                        <div onclick="showMatrixDetail('BX')" class="p-3.5 rounded-xl bg-blue-500 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">BX</div>
+                            <div class="text-[11px] font-semibold opacity-90">Standart Aylanma</div>
+                            <div class="text-[10px] mt-1 opacity-75">Markaziy 2-yarus</div>
+                        </div>
+                        <div onclick="showMatrixDetail('BY')" class="p-3.5 rounded-xl bg-blue-600 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">BY</div>
+                            <div class="text-[11px] font-semibold opacity-90">Mavsumiy O'rtacha</div>
+                            <div class="text-[10px] mt-1 opacity-75">Markaziy 3-yarus</div>
+                        </div>
+                        <div onclick="showMatrixDetail('BZ')" class="p-3.5 rounded-xl bg-blue-700 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">BZ</div>
+                            <div class="text-[11px] font-semibold opacity-90">Nodir Buyurtma</div>
+                            <div class="text-[10px] mt-1 opacity-75">Oraliq yarus</div>
+                        </div>
+
+                        <div onclick="showMatrixDetail('CX')" class="p-3.5 rounded-xl bg-slate-400 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">CX</div>
+                            <div class="text-[11px] font-semibold opacity-90">Kichik Doimiy</div>
+                            <div class="text-[10px] mt-1 opacity-75">Ombor to'ri (4-yarus)</div>
+                        </div>
+                        <div onclick="showMatrixDetail('CY')" class="p-3.5 rounded-xl bg-slate-500 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">CY</div>
+                            <div class="text-[11px] font-semibold opacity-90">Kam Mavsumiy</div>
+                            <div class="text-[10px] mt-1 opacity-75">Yuqori yarus</div>
+                        </div>
+                        <div onclick="showMatrixDetail('CZ')" class="p-3.5 rounded-xl bg-slate-600 text-white cursor-pointer hover:shadow-lg hover:scale-[1.02] transition">
+                            <div class="text-base font-extrabold">CZ</div>
+                            <div class="text-[11px] font-semibold opacity-90">"Muzlagan Zaxira"</div>
+                            <div class="text-[10px] mt-1 opacity-75">Eng uzoq 5-yarus</div>
+                        </div>
+                    </div>
+
+                    <div id="matrix-info-box" class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                        <span class="font-bold text-slate-800 text-sm" id="matrix-title">Tanlangan: AX — Oltin Zona</span>
+                        <p class="text-slate-600" id="matrix-desc">
+                            43"-55" Smart TVlar va standart avtomat kir yuvish mashinalari. Tovar aylanmasining asosiy drayveri. Jo'natish doklariga eng yaqin 1-yarusga joylashtiriladi.
+                        </p>
+                        <div class="text-[11px] text-emerald-700 font-semibold pt-1" id="matrix-action">
+                            Boshqaruv usuli: Kunlik JIT to'ldirish, xavfsizlik zaxirasi minimal (2-3 kunlik).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pareto Diagrammasi (5 ustun) -->
+                <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-base text-slate-900">ABC Pareto Taqsimot Grafigi</h3>
+                    <p class="text-xs text-slate-500">20% tovarlar 80% umumiy korxona aylanmasini ta'minlaydi.</p>
+                    <div class="h-56">
+                        <canvas id="paretoChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs pt-2">
+                        <div class="p-2 rounded-lg bg-emerald-50 text-emerald-800">
+                            <span class="block font-extrabold text-sm">80%</span>
+                            <span class="text-[10px]">Aylanma (A)</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-blue-50 text-blue-800">
+                            <span class="block font-extrabold text-sm">15%</span>
+                            <span class="text-[10px]">Aylanma (B)</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-slate-100 text-slate-700">
+                            <span class="block font-extrabold text-sm">5%</span>
+                            <span class="text-[10px]">Aylanma (C)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interaktiv Tovar Namunalari Jadvali -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-sm">Ombordagi Tovarlar Joylashuvi (Slotting Manzillari)</h3>
+                        <p class="text-xs text-slate-500">WMS tizimiga integratsiyalashgan tovarlar bazasi</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="filterTable('all')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-white">Hammasi</button>
+                        <button onclick="filterTable('A')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">A Guruhi</button>
+                        <button onclick="filterTable('B')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">B Guruhi</button>
+                        <button onclick="filterTable('C')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">C Guruhi</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Mahsulot Nomi</th>
+                                <th class="p-3">Kategoriya</th>
+                                <th class="p-3">ABC</th>
+                                <th class="p-3">XYZ</th>
+                                <th class="p-3">WMS Yacheyka Manzili</th>
+                                <th class="p-3">Joylashuv Zonasi</th>
+                                <th class="p-3 text-right">Oylik Sotuv</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sku-table-body" class="divide-y divide-slate-100 text-slate-700">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4-BO'LIM: TEXNOLOGIYALAR VA JIHOZLAR (MHE & WMS) -->
+        <section id="jihozlar-wms" class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                    <i data-lucide="cpu" class="w-6 h-6 text-blue-600"></i>
+                    Ombor Texnologiyalari va MHE Uskunalari
+                </h2>
+                <p class="text-sm text-slate-500">Ichki logistika mashinalari, avtomatlashtirilgan WMS dasturi va RFID markirovkalash tizimlari.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">3 dona</span>
+                            <i data-lucide="chevrons-up" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base mt-2">Elektr Reach-Truck</h4>
+                        <p class="text-xs text-slate-500">Jungheinrich ETV 216i (Germaniya)</p>
+                        <div class="mt-3 space-y-1.5 text-xs text-slate-600">
+                            <div class="flex justify-between"><span>Balandligi:</span><span class="font-semibold text-slate-800">10.5 metr</span></div>
+                            <div class="flex justify-between"><span>Quvvati:</span><span class="font-semibold text-slate-800">1,600 kg</span></div>
+                            <div class="flex justify-between"><span>Yo'lak (Ast):</span><span class="font-semibold text-slate-800">2.85 m</span></div>
+                        </div>
+                    </div>
+                    <div class="p-2 rounded-lg bg-slate-50 text-[11px] text-slate-600 border border-slate-100">
+                        Vazifasi: 5-yarusgacha palletlarni joylashtirish va tushirish.
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">2 dona</span>
+                            <i data-lucide="forklift" class="w-5 h-5 text-emerald-600"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base mt-2">Elektr Frontal Forklift</h4>
+                        <p class="text-xs text-slate-500">Toyota 8FBE18 (3 tayanchli)</p>
+                        <div class="mt-3 space-y-1.5 text-xs text-slate-600">
+                            <div class="flex justify-between"><span>Balandligi:</span><span class="font-semibold text-slate-800">4.5 metr</span></div>
+                            <div class="flex justify-between"><span>Quvvati:</span><span class="font-semibold text-slate-800">1,800 kg</span></div>
+                            <div class="flex justify-between"><span>Batareya:</span><span class="font-semibold text-slate-800">Li-Ion tezkor</span></div>
+                        </div>
+                    </div>
+                    <div class="p-2 rounded-lg bg-slate-50 text-[11px] text-slate-600 border border-slate-100">
+                        Vazifasi: Rampa doklarida furalardan yuk tushirish va ortish.
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">3 dona</span>
+                            <i data-lucide="zap" class="w-5 h-5 text-amber-600"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base mt-2">Elektr Pallet Tashuvchi</h4>
+                        <p class="text-xs text-slate-500">Still EXH-S 20 (Platformali)</p>
+                        <div class="mt-3 space-y-1.5 text-xs text-slate-600">
+                            <div class="flex justify-between"><span>Tezligi:</span><span class="font-semibold text-slate-800">12 km/soat</span></div>
+                            <div class="flex justify-between"><span>Quvvati:</span><span class="font-semibold text-slate-800">2,000 kg</span></div>
+                            <div class="flex justify-between"><span>Boshqaruv:</span><span class="font-semibold text-slate-800">Operator maydoni</span></div>
+                        </div>
+                    </div>
+                    <div class="p-2 rounded-lg bg-slate-50 text-[11px] text-slate-600 border border-slate-100">
+                        Vazifasi: Qabuldan asosiy saqlashga gorizontal tezkor yetkazish.
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-700">6 dona</span>
+                            <i data-lucide="move" class="w-5 h-5 text-purple-600"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base mt-2">Gidravlik Qo'l Roklasi</h4>
+                        <p class="text-xs text-slate-500">Standart sanoat aravachasi</p>
+                        <div class="mt-3 space-y-1.5 text-xs text-slate-600">
+                            <div class="flex justify-between"><span>Quvvati:</span><span class="font-semibold text-slate-800">2,500 kg</span></div>
+                            <div class="flex justify-between"><span>Vilka:</span><span class="font-semibold text-slate-800">1150 x 550 mm</span></div>
+                            <div class="flex justify-between"><span>G'ildirak:</span><span class="font-semibold text-slate-800">Poliuretan</span></div>
+                        </div>
+                    </div>
+                    <div class="p-2 rounded-lg bg-slate-50 text-[11px] text-slate-600 border border-slate-100">
+                        Vazifasi: Buyurtma yig'ish va yordamchi mayda siljitishlar.
+                    </div>
+                </div>
+            </div>
+
+            <!-- WMS, RFID, GS1 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-5 rounded-2xl bg-gradient-to-br from-blue-900 to-slate-900 text-white border border-blue-800 shadow-lg space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300">
+                        <i data-lucide="network" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">WMS Raqamli Arxitekturasi</h3>
+                    <p class="text-xs text-blue-200/90 leading-relaxed">
+                        Qog'ozsiz boshqaruv. ERP (1C/SAP) bilan integratsiya qilingan. TSD terminallari orqali to'lqinli buyurtma terish (Wave Picking) va real-vaqt zaxira nazorati.
+                    </p>
+                    <span class="inline-block text-[11px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-800">
+                        API Status: 100% Synced
+                    </span>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <i data-lucide="qr-code" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-900">GS1-128 va Seriya Raqamlash</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Har bir tovarning zavod seriya raqami (Serial No/IMEI) qabul paytida o'qiladi. Bu kafolatli servis (warranty) va qaytuvlar nazoratini 100% aniqlaydi.
+                    </p>
+                    <span class="inline-block text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                        Standart: GS1 SSCC Pallet Codes
+                    </span>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                        <i data-lucide="radio" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-900">RFID Portallar (Dok eshiklari)</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Dok 1-8 darvozalariga o'rnatilgan passiv UHF RFID antennalar butun pallet ortilgan forklift o'tayotganda taglikdagi barcha tovarlarni 0.5 soniyada to'liq skanerlaydi.
+                    </p>
+                    <span class="inline-block text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-1 rounded">
+                        Tezlik: 120 ta teg / soniya
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5-BO'LIM: INTERAKTIV OMBOR KALKULYATORI (JONLI HISOBLASH) -->
+        <section id="jonli-kalkulyator" class="space-y-6">
+            <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl">
+                <div class="max-w-3xl space-y-2">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold backdrop-blur">
+                        <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                        <span>Jonli Muhandislik Kalkulyatori</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                        Interaktiv Omborxona Parametrlari Kalkulyatori
+                    </h2>
+                    <p class="text-blue-100 text-sm">
+                        O'qituvchi va ekspertlar uchun maxsus: ombor maydoni yoki kunlik yuk aylanmasini o'zgartiring va zonalar taqsimoti, pallet sig'imi, MHE texnikasi va doklar sonini jonli hisoblang!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Kalkulyator Asosiy Paneli -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Slayderlar (5 ustun) -->
+                <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <i data-lucide="settings-2" class="w-4 h-4 text-blue-600"></i> Boshqaruv Slayderlari
+                        </h3>
+                        <button onclick="resetCalculator()" class="text-xs text-blue-600 hover:underline flex items-center gap-1 font-semibold">
+                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Asliga qaytarish
+                        </button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-area" class="font-bold text-slate-700">Ombor Umumiy Maydoni (m²):</label>
+                            <span id="val-area" class="px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 font-extrabold text-sm">4,000 m²</span>
+                        </div>
+                        <input id="input-area" type="range" min="1500" max="15000" step="500" value="4000" oninput="calculateWarehouse()"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>1,500 m²</span>
+                            <span>8,000 m²</span>
+                            <span>15,000 m²</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-flow" class="font-bold text-slate-700">Kunlik Buyurtma Palletlari (dona):</label>
+                            <span id="val-flow" class="px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 font-extrabold text-sm">240 pallet</span>
+                        </div>
+                        <input id="input-flow" type="range" min="80" max="1000" step="20" value="240" oninput="calculateWarehouse()"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>80 pallet</span>
+                            <span>500 pallet</span>
+                            <span>1,000 pallet</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-tiers" class="font-bold text-slate-700">Stellaj Balandlik Yaruslari:</label>
+                            <span id="val-tiers" class="px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 font-extrabold text-sm">5 Yarus (H=11m)</span>
+                        </div>
+                        <input id="input-tiers" type="range" min="3" max="7" step="1" value="5" oninput="calculateWarehouse()"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>3 yarus (7 m)</span>
+                            <span>5 yarus (11 m)</span>
+                            <span>7 yarus (14 m)</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <label class="block text-xs font-bold text-slate-700">Ish Tartibi va Smenalar:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="shift-btn-1" onclick="setShift(1)" class="p-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:border-blue-400 transition">
+                                1 Smena (8 soat)
+                            </button>
+                            <button id="shift-btn-2" onclick="setShift(2)" class="p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50 text-xs font-extrabold text-blue-700 transition">
+                                2 Smena (16 soat)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jonli Hisoblangan Natijalar (7 ustun) -->
+                <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-6">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> Avtomatik Muhandislik Hisobi
+                            </h3>
+                            <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                                Dinamik Formula
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] uppercase font-bold text-slate-500">Pallet Sig'imi</span>
+                                <div id="calc-capacity" class="text-xl font-extrabold text-indigo-700 mt-1">3,400</div>
+                                <span class="text-[10px] text-slate-400">standart taglik</span>
+                            </div>
+
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] uppercase font-bold text-slate-500">Reach-trucklar</span>
+                                <div id="calc-reach-trucks" class="text-xl font-extrabold text-blue-700 mt-1">3 dona</div>
+                                <span class="text-[10px] text-slate-400">1.6t / 10.5m</span>
+                            </div>
+
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] uppercase font-bold text-slate-500">Zarur Doklar</span>
+                                <div id="calc-dock-doors" class="text-xl font-extrabold text-emerald-700 mt-1">8 dona</div>
+                                <span class="text-[10px] text-slate-400">4 kirish + 4 chiqish</span>
+                            </div>
+
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] uppercase font-bold text-slate-500">Furalar Soni</span>
+                                <div id="calc-trucks-daily" class="text-xl font-extrabold text-amber-700 mt-1">11 fura</div>
+                                <span class="text-[10px] text-slate-400">kuniga 20t TIR</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 pt-2">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Zonalar Bo'yicha Maydon Taqsimoti ($m^2$):</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                <div class="flex justify-between p-2 rounded-lg bg-sky-50 border border-sky-100">
+                                    <span class="text-sky-900 font-medium">Qabul qilish (12%):</span>
+                                    <span id="calc-receiving" class="font-extrabold text-sky-700">480 m²</span>
+                                </div>
+                                <div class="flex justify-between p-2 rounded-lg bg-indigo-50 border border-indigo-100">
+                                    <span class="text-indigo-900 font-medium">Asosiy Saqlash (55%):</span>
+                                    <span id="calc-storage" class="font-extrabold text-indigo-700">2,200 m²</span>
+                                </div>
+                                <div class="flex justify-between p-2 rounded-lg bg-amber-50 border border-amber-100">
+                                    <span class="text-amber-900 font-medium">Butlash & Yig'ish (15%):</span>
+                                    <span id="calc-picking" class="font-extrabold text-amber-700">600 m²</span>
+                                </div>
+                                <div class="flex justify-between p-2 rounded-lg bg-rose-50 border border-rose-100">
+                                    <span class="text-rose-900 font-medium">Jo'natish (11%):</span>
+                                    <span id="calc-shipping" class="font-extrabold text-rose-700">440 m²</span>
+                                </div>
+                                <div class="flex justify-between p-2 rounded-lg bg-slate-100 border border-slate-200 sm:col-span-2">
+                                    <span class="text-slate-800 font-medium">Ma'muriy & Texnik Zaryadlash (7%):</span>
+                                    <span id="calc-admin" class="font-extrabold text-slate-800">280 m²</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-900 text-white flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-400">Taxminiy CAPEX Investitsiya</span>
+                            <div id="calc-capex" class="text-xl font-extrabold text-emerald-400">$870,000</div>
+                            <span class="text-[11px] text-slate-400">Stellaj, texnika, WMS, doklar</span>
+                        </div>
+                        <div class="sm:text-right">
+                            <span class="text-[10px] uppercase font-bold text-slate-400">O'zini Oqlash Muddati (Payback)</span>
+                            <div id="calc-payback" class="text-xl font-extrabold text-blue-400">2.56 yil</div>
+                            <span class="text-[11px] text-slate-400">Yillik tejamkorlik: $340,000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6-BO'LIM: KPI VA SAMARADORLIK PANELİ (DASHBOARD) -->
+        <section id="kpi-dashboard" class="space-y-6">
+            <div>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                    <i data-lucide="gauge" class="w-6 h-6 text-emerald-600"></i>
+                    KPI va Boshqaruv Samaradorligi Ko'rsatkichlari
+                </h2>
+                <p class="text-sm text-slate-500">Ombor operatsiyalarining sifati, tezligi va xavfsizligini ta'minlovchi monitoring datchiklari.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-500">OTIF Ko'rsatkichi</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">A'lo</span>
+                    </div>
+                    <div class="text-3xl font-extrabold text-emerald-600">98.7%</div>
+                    <p class="text-xs text-slate-600">On-Time In-Full (O'z vaqtida va to'liq yetkazish darajasi). Me'yor: &ge; 98.5%.</p>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="bg-emerald-500 h-2 rounded-full" style="width: 98.7%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-500">Buyurtma Tayyorlash Vaqti</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">Yuqori Tezlik</span>
+                    </div>
+                    <div class="text-3xl font-extrabold text-blue-600">42 daqiqa</div>
+                    <p class="text-xs text-slate-600">Order Lead Time (WMS to'lqinli yig'ish hisobiga). Me'yor: &le; 45 daqiqa.</p>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full" style="width: 85%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-500">Inventarizatsiya Aniqligi (IRA)</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800">Maksimal</span>
+                    </div>
+                    <div class="text-3xl font-extrabold text-purple-600">99.85%</div>
+                    <p class="text-xs text-slate-600">Inventory Record Accuracy (WMS manzilli nazorat). Tovar yo'qolish xavfi bartaraf etilgan.</p>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="bg-purple-600 h-2 rounded-full" style="width: 99.8%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-500">Maydon Koeffitsiyenti ($k_m$)</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-800">Optimal</span>
+                    </div>
+                    <div class="text-3xl font-extrabold text-slate-800">0.55 <span class="text-base text-slate-500 font-normal">(55%)</span></div>
+                    <p class="text-xs text-slate-600">Foydali saqlash maydonining nisbati: $2,200\text{ m}^2 / 4,000\text{ m}^2$. Me'yor: 50-60%.</p>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="bg-slate-700 h-2 rounded-full" style="width: 55%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-500">Butlash Aniqligi (Accuracy)</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">99.9%</span>
+                    </div>
+                    <div class="text-3xl font-extrabold text-emerald-600">99.92%</div>
+                    <p class="text-xs text-slate-600">Skaner orqali verifikatsiya. Xato buyurtma jo'natish darajasi 0.08% dan past.</p>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="bg-emerald-500 h-2 rounded-full" style="width: 99.9%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-500">Investitsiya Qoplanishi (PP)</span>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">2.56 Yil</span>
+                    </div>
+                    <div class="text-3xl font-extrabold text-amber-600">2 yil 7 oy</div>
+                    <p class="text-xs text-slate-600">Dastlabki $870,000 investitsiya yillik $340,000 sof tejamkorlik hisobiga qoplanadi.</p>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="bg-amber-500 h-2 rounded-full" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 text-xs border-t border-slate-800 mt-16 py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold">
+                        TL
+                    </div>
+                    <div>
+                        <span class="text-white font-bold text-sm">"TexnoLogistik" MChJ Simulyatsion Taqsimot Markazi (2D & 3D)</span>
+                        <p class="text-slate-500 text-[11px]">"Omborxona Logistikasi" fani bo'yicha mustaqil loyiha ishi</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <a href="Simulyatsion_Loyiha_TexnoLogistik_Omborxona.md" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1.5 text-xs">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> To'liq Hisobot (Markdown)
+                    </a>
+                </div>
+            </div>
+            <div class="text-center pt-2 text-slate-600 text-[10px]">
+                &copy; 2026 TexnoLogistik MChJ Logistika Simulyatori. Barcha huquqlar himoyalangan.
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERAKTIV JAVASCRIPT VA 3D THREE.JS DVIGATELI -->
+    <script>
+        lucide.createIcons();
+
+        // 1. ZONALAR MA'LUMOTLAR BAZASI
+        const zoneData = {
+            receiving: {
+                title: "Qabul Qilish Zonasi (Inbound)",
+                percent: "12%",
+                area: 480,
+                desc: "Yuk furalaridan tovarlarni tushirish, partiya butunligini va zavod qadoqlarini tekshirish, GS1-128 shtrix-kod va seriya raqamlarini WMS tizimiga dastlabki kirim qilish maydoni.",
+                equipment: [
+                    "4 ta avtomatlashtirilgan gidravlik dokleveller",
+                    "Germetik dokshelterlar (issiq/sovuqdan himoya)",
+                    "2 ta elektr Toyota forklift (4.5 m ko'tarish)",
+                    "Zebra TC26 TSD skanerlari (Wi-Fi 6 tarmog'ida)"
+                ],
+                throughput: "120 - 156 t/kun (11 fura)",
+                staff: "5 nafar qabulchi-inspektor",
+                icon: "download",
+                colorClass: "sky"
+            },
+            storage: {
+                title: "Asosiy Saqlash Zonasi (Main Storage)",
+                percent: "55%",
+                area: 2200,
+                desc: "Mahsulotlarni 5 yarusli balandlikda (10.5 m) xavfsiz va tizimli saqlash. 1,750 m² frontal selektiv stelajlar (3,400 pallet o'rni) hamda 450 m² muzlatgich va yirik texnikalar uchun polli blok saqlash hududi.",
+                equipment: [
+                    "Frontal ko'p yarusli stellaj konstruksiyalari",
+                    "3 ta baland ko'taruvchi Jungheinrich Reach-truck",
+                    "Dinamik WMS adreslash: A-04-03-2 tizimi",
+                    "Polimer changimaydigan topping pol (7 t/m²)"
+                ],
+                throughput: "3,400 pallet sig'imi",
+                staff: "8 nafar operator va haydovchi",
+                icon: "layers",
+                colorClass: "indigo"
+            },
+            picking: {
+                title: "Buyurtma Yig'ish va Butlash (Picking)",
+                percent: "15%",
+                area: 600,
+                desc: "Chakana va ulgurji tarmoqlar buyurtmalarini tezkor to'plash, donalab va qutilab komonovka qilish. Mayda maishiy texnika uchun gravitatsion tokchalar (Carton Flow) va qadoqlash stollari.",
+                equipment: [
+                    "Gravitatsion rolikli Carton Flow tokchalari",
+                    "Pick-by-Voice ovozli buyurtma terish garniturasi",
+                    "6 ta qo'l gidravlik roklasi va aravachalar",
+                    "Avtomatlashtirilgan strech-plyonka o'rash mashinasi"
+                ],
+                throughput: "Kuniga 850+ mijoz buyurtmasi",
+                staff: "10 nafar butlovchi operator",
+                icon: "shopping-cart",
+                colorClass: "amber"
+            },
+            shipping: {
+                title: "Jo'natish va Ekspeditsiya Zonasi (Outbound)",
+                percent: "11%",
+                area: 440,
+                desc: "Yig'ilgan va qadoqlangan tayyor buyurtmalarni marshrutlar bo'yicha jamlash (Staging lanes: Toshkent shahri, Vodiy, Janub, G'arb) va transport vositalariga ortish hududi.",
+                equipment: [
+                    "4 ta jo'natish doki (Dok 5 — 8)",
+                    "UHF RFID portal darvozalari (avtomat chiqim)",
+                    "3 ta tezkor platformali Still elektr aravachasi",
+                    "Marshrut belgilari bilan ajratilgan pol kataklari"
+                ],
+                throughput: "Kuniga 11-14 ta yetkazib berish mashinasi",
+                staff: "5 nafar ekspeditor va yuklovchi",
+                icon: "upload",
+                colorClass: "rose"
+            },
+            admin: {
+                title: "Ma'muriy-Texnik va Zaryadlash Zonasi",
+                percent: "7%",
+                area: 280,
+                desc: "Ombor logistika dispetcherligi, WMS IT server xonasi, xodimlar kiyinish va dam olish xonalari hamda elektr MHE texnikalarining akkumulyatorlarini zaryadlash stansiyasi.",
+                equipment: [
+                    "Portlashdan himoyalangan majburiy tortish ventilyatsiyasi",
+                    "Kislotaga chidamli sanoat pol va yuvish dushlari",
+                    "WMS server va tarmoq kommutatorlari (Zaxira UPS)",
+                    "Avtomatik yong'in datchiklari va videokuzatuv markazi"
+                ],
+                throughput: "8 ta zaryadlash shkafi",
+                staff: "3 nafar IT va ma'muriy dispetcher",
+                icon: "battery-charging",
+                colorClass: "slate"
+            }
+        };
+
+        function selectZone(zoneKey) {
+            const data = zoneData[zoneKey];
+            if (!data) return;
+
+            document.getElementById('detail-zone-title').innerText = data.title;
+            document.getElementById('detail-zone-percent').innerText = data.percent;
+            document.getElementById('detail-zone-area').innerText = `${data.area} m² (Hisoblangan)`;
+            document.getElementById('detail-zone-desc').innerText = data.desc;
+            document.getElementById('detail-zone-throughput').innerText = data.throughput;
+            document.getElementById('detail-zone-staff').innerText = data.staff;
+
+            const eqList = document.getElementById('detail-zone-equipment');
+            eqList.innerHTML = '';
+            data.equipment.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                eqList.appendChild(li);
+            });
+
+            const iconBg = document.getElementById('detail-zone-icon-bg');
+            iconBg.className = `w-12 h-12 rounded-xl bg-${data.colorClass}-50 text-${data.colorClass}-600 flex items-center justify-center`;
+            iconBg.innerHTML = `<i data-lucide="${data.icon}" class="w-6 h-6"></i>`;
+            lucide.createIcons();
+
+            // 3D kamerani o'sha zonaga yumshoq yo'naltirish
+            focus3DZone(zoneKey);
+        }
+
+        // 2. 2D / 3D REJIM ALMASHTIRGICHI
+        function setViewMode(mode) {
+            const c2d = document.getElementById('container-2d-view');
+            const c3d = document.getElementById('container-3d-view');
+            const b2d = document.getElementById('view-mode-2d');
+            const b3d = document.getElementById('view-mode-3d');
+            const bSplit = document.getElementById('view-mode-split');
+
+            b2d.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
+            b3d.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
+            bSplit.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
+
+            if (mode === '2d') {
+                c2d.classList.remove('hidden');
+                c3d.classList.add('hidden');
+                b2d.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow font-bold transition";
+            } else if (mode === '3d') {
+                c3d.classList.remove('hidden');
+                c2d.classList.add('hidden');
+                b3d.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow font-bold transition flex items-center gap-1.5";
+                on3DResize();
+            } else {
+                // Split rejim
+                c2d.classList.remove('hidden');
+                c3d.classList.remove('hidden');
+                bSplit.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow font-bold transition flex items-center gap-1.5";
+                on3DResize();
+            }
+        }
+
+        // 3. THREE.JS 3D OMBOR MODELI VA ANIMATSIYASI
+        let scene3D, camera3D, renderer3D, controls3D, animId3D;
+        let flowParticles = [];
+        let autoRotate3D = true;
+
+        function init3DScene() {
+            const canvas = document.getElementById('warehouse-3d-canvas');
+            if (!canvas || typeof THREE === 'undefined') {
+                document.getElementById('3d-loading-overlay').classList.add('hidden');
+                return;
+            }
+
+            const width = canvas.parentElement.clientWidth || 700;
+            const height = canvas.parentElement.clientHeight || 420;
+
+            // Sahna
+            scene3D = new THREE.Scene();
+            scene3D.background = new THREE.Color(0x0a0f1d);
+            scene3D.fog = new THREE.FogExp2(0x0a0f1d, 0.008);
+
+            // Kamera
+            camera3D = new THREE.PerspectiveCamera(42, width / height, 0.5, 1000);
+            camera3D.position.set(-75, 65, 80);
+
+            // Renderer
+            renderer3D = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer3D.setSize(width, height);
+            renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer3D.shadowMap.enabled = true;
+            renderer3D.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            // Boshqaruv (OrbitControls)
+            controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
+            controls3D.enableDamping = true;
+            controls3D.dampingFactor = 0.05;
+            controls3D.maxPolarAngle = Math.PI / 2.05; // Pol tagiga o'tmaslik
+            controls3D.minDistance = 15;
+            controls3D.maxDistance = 250;
+            controls3D.target.set(0, 0, 0);
+
+            // Yoritish (Lighting)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+            scene3D.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            sunLight.position.set(60, 100, 40);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 1024;
+            sunLight.shadow.mapSize.height = 1024;
+            scene3D.add(sunLight);
+
+            const blueLight = new THREE.PointLight(0x0284c7, 2, 80);
+            blueLight.position.set(-35, 15, -20);
+            scene3D.add(blueLight);
+
+            const greenLight = new THREE.PointLight(0x10b981, 2, 80);
+            greenLight.position.set(35, 15, -20);
+            scene3D.add(greenLight);
+
+            // 1. OMBOR POLI VA ZONALAR BELGILARI (100 x 40 metr nisbati)
+            buildWarehouseFloor();
+
+            // 2. STELLAJLAR VA PALLETLARNI YASASH (5 yarus)
+            buildStorageRacks();
+
+            // 3. RAMPA, DOKLAR VA FURAlar
+            buildDocksAndTrucks();
+
+            // 4. MHE TEXNIKALARI (Forkliftlar & Reach-trucklar)
+            buildHandlingEquipment();
+
+            // 5. U-SHAKLIDAGI NEON TOVAR OQIMI CHIZIG'I
+            buildUFlowPath();
+
+            // Yuklanishni yashirish
+            setTimeout(() => {
+                const overlay = document.getElementById('3d-loading-overlay');
+                if (overlay) overlay.classList.add('hidden');
+            }, 300);
+
+            // Animatsiya sikli
+            animate3D();
+        }
+
+        function buildWarehouseFloor() {
+            // Asosiy beton pol (100 x 44)
+            const floorGeo = new THREE.PlaneGeometry(100, 44);
+            const floorMat = new THREE.MeshStandardMaterial({
+                color: 0x1e293b,
+                roughness: 0.6,
+                metalness: 0.2
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene3D.add(floor);
+
+            // Pol to'ri (Grid)
+            const grid = new THREE.GridHelper(100, 50, 0x3b82f6, 0x1e293b);
+            grid.position.y = 0.05;
+            scene3D.add(grid);
+
+            // Zonalar belgilari (Rangli maydonlar)
+            // Qabul qilish zonasi (Sky Blue)
+            createZonePlane(-35, -7, 24, 26, 0x0284c7, 0.18, "Qabul");
+            // Asosiy saqlash (Indigo)
+            createZonePlane(0, 3, 44, 34, 0x4f46e5, 0.15, "Saqlash");
+            // Yig'ish - Picking (Amber)
+            createZonePlane(35, 6, 24, 18, 0xf59e0b, 0.18, "Yig'ish");
+            // Jo'natish - Shipping (Rose)
+            createZonePlane(35, -12, 24, 16, 0xe11d48, 0.18, "Jo'natish");
+            // Ma'muriy va Zaryadlash (Slate)
+            createZonePlane(-35, 12, 24, 12, 0x64748b, 0.25, "Admin");
+
+            // Tashqi devor konturlari (Shaffof shisha devorlar)
+            const wallMat = new THREE.MeshPhysicalMaterial({
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.12,
+                roughness: 0.1,
+                transmission: 0.9,
+                thickness: 0.5
+            });
+            // Orqa devor
+            const backWall = new THREE.Mesh(new THREE.BoxGeometry(100, 12, 0.5), wallMat);
+            backWall.position.set(0, 6, 22);
+            scene3D.add(backWall);
+
+            // Chap devor
+            const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.5, 12, 44), wallMat);
+            leftWall.position.set(-50, 6, 0);
+            scene3D.add(leftWall);
+
+            // O'ng devor
+            const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.5, 12, 44), wallMat);
+            rightWall.position.set(50, 6, 0);
+            scene3D.add(rightWall);
+
+            // Ustunlar (Pillars)
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
+            for (let x = -40; x <= 40; x += 20) {
+                for (let z = -15; z <= 15; z += 30) {
+                    const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.8, 12, 0.8), pillarMat);
+                    pillar.position.set(x, 6, z);
+                    pillar.castShadow = true;
+                    scene3D.add(pillar);
+                }
+            }
+        }
+
+        function createZonePlane(x, z, w, d, color, opacity, name) {
+            const geo = new THREE.PlaneGeometry(w, d);
+            const mat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: opacity, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.set(x, 0.1, z);
+            scene3D.add(mesh);
+
+            // Chegara chizig'i
+            const edges = new THREE.EdgesGeometry(geo);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color, linewidth: 2 }));
+            line.rotation.x = -Math.PI / 2;
+            line.position.set(x, 0.12, z);
+            scene3D.add(line);
+        }
+
+        function buildStorageRacks() {
+            // 4 ta qo'shaloq qator stellajlar (A, B, C qatorlar)
+            const rackBlueMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.4 });
+            const beamOrangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.4 });
+            const palletWoodMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.8 });
+            const boxColors = [0x3b82f6, 0xf8fafc, 0xe2e8f0, 0xd97706, 0x10b981];
+
+            const rackXStarts = [-16, -6, 6, 16];
+
+            rackXStarts.forEach(rx => {
+                // Har bir qatorda 8 ta seksiya
+                for (let s = 0; s < 7; s++) {
+                    const rz = -12 + s * 4.2;
+
+                    // Vertikal stoykalar (Balandligi 11m, masshtab: 9.5 unit)
+                    for (let px of [rx - 1.2, rx + 1.2]) {
+                        for (let pz of [rz - 1.8, rz + 1.8]) {
+                            const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 9.5, 0.2), rackBlueMat);
+                            post.position.set(px, 4.75, pz);
+                            post.castShadow = true;
+                            scene3D.add(post);
+                        }
+                    }
+
+                    // 5 ta Yarus Balkalari va Palletlar
+                    for (let tier = 1; tier <= 5; tier++) {
+                        const ty = tier * 1.8;
+                        // To'sinlar
+                        const beam1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.2, 3.6), beamOrangeMat);
+                        beam1.position.set(rx - 1.2, ty, rz);
+                        const beam2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.2, 3.6), beamOrangeMat);
+                        beam2.position.set(rx + 1.2, ty, rz);
+                        scene3D.add(beam1, beam2);
+
+                        // Palletlar va qutilar (80% to'la)
+                        if (Math.random() > 0.15) {
+                            for (let pOffset of [-0.9, 0.9]) {
+                                // Pallet taglik
+                                const pal = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.15, 1.4), palletWoodMat);
+                                pal.position.set(rx, ty + 0.1, rz + pOffset);
+                                pal.castShadow = true;
+                                scene3D.add(pal);
+
+                                // Tovar qutisi (TV, maishiy texnika)
+                                const bColor = boxColors[Math.floor(Math.random() * boxColors.length)];
+                                const boxMat = new THREE.MeshStandardMaterial({ color: bColor, roughness: 0.5 });
+                                const box = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.2), boxMat);
+                                box.position.set(rx, ty + 0.8, rz + pOffset);
+                                box.castShadow = true;
+                                scene3D.add(box);
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Polli saqlash hududi (Muzlatkichlar oq bloklari)
+            for (let bx = -22; bx <= -19; bx += 2) {
+                for (let bz = -5; bz <= 5; bz += 2.2) {
+                    const frMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.3, metalness: 0.4 });
+                    const fridge = new THREE.Mesh(new THREE.BoxGeometry(1.5, 3.2, 1.5), frMat);
+                    fridge.position.set(bx, 1.6, bz);
+                    fridge.castShadow = true;
+                    scene3D.add(fridge);
+                }
+            }
+        }
+
+        function buildDocksAndTrucks() {
+            // Old devor (Rampa fasadi: z = -22)
+            const dockWallMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+
+            // 8 ta Dok eshiklari
+            for (let i = 0; i < 8; i++) {
+                const isReceiving = i < 4;
+                const dx = isReceiving ? -42 + i * 5 : 27 + (i - 4) * 5;
+
+                // Dok darvoza ramkasi
+                const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.5, 0.4), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+                doorFrame.position.set(dx, 2.8, -22);
+                scene3D.add(doorFrame);
+
+                // Ochiq darvoza teshigi va roleta
+                const shutter = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.5, 0.2), new THREE.MeshStandardMaterial({ color: 0x64748b }));
+                shutter.position.set(dx, 4.8, -22.1);
+                scene3D.add(shutter);
+
+                // Gidravlik dokleveller (qizil)
+                const leveler = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.2, 3), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
+                leveler.position.set(dx, 0.15, -23.5);
+                scene3D.add(leveler);
+
+                // Dok raqami belgisi
+                const signMat = new THREE.MeshBasicMaterial({ color: isReceiving ? 0x0284c7 : 0xe11d48 });
+                const sign = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.1), signMat);
+                sign.position.set(dx, 6.2, -22);
+                scene3D.add(sign);
+            }
+
+            // Rampada turgan 20t Fura (Qabul dokida)
+            buildTruck(-37, -35, 0x1d4ed8);
+            // Jo'natish dokidagi yuk mashinasi
+            buildTruck(32, -35, 0x10b981);
+        }
+
+        function buildTruck(x, z, cabColor) {
+            const truckGroup = new THREE.Group();
+
+            // Kabina
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.8, 3.5), new THREE.MeshStandardMaterial({ color: cabColor, roughness: 0.3 }));
+            cab.position.set(0, 2.2, -8);
+            truckGroup.add(cab);
+
+            // Yarim tirkama (Katta oq fura furgoni)
+            const trailer = new THREE.Mesh(new THREE.BoxGeometry(3.4, 4.2, 13), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 }));
+            trailer.position.set(0, 2.8, 0);
+            trailer.castShadow = true;
+            truckGroup.add(trailer);
+
+            // G'ildiraklar
+            const wheelGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.6, 16);
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 });
+            for (let wz of [-8, 2, 4, 6]) {
+                for (let wx of [-1.8, 1.8]) {
+                    const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+                    wheel.rotation.z = Math.PI / 2;
+                    wheel.position.set(wx, 0.6, wz);
+                    truckGroup.add(wheel);
+                }
+            }
+
+            truckGroup.position.set(x, 0, z);
+            scene3D.add(truckGroup);
+        }
+
+        function buildHandlingEquipment() {
+            // Reach-truck (Sariq/Qora baland ko'taruvchi)
+            buildForklift(-3, 0, 0, 0xfacc15, 8);
+            buildForklift(10, 0, 5, 0xfacc15, 4);
+
+            // Frontal forklift rampada
+            buildForklift(-34, 0, -12, 0xea580c, 2.5);
+            buildForklift(36, 0, -6, 0x0284c7, 2);
+        }
+
+        function buildForklift(x, y, z, color, mastHeight) {
+            const fg = new THREE.Group();
+            // Korpus
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.4, 2.2), new THREE.MeshStandardMaterial({ color: color }));
+            body.position.set(0, 0.9, 0);
+            fg.add(body);
+
+            // Himoya tomi (Overhead guard)
+            const roof = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.1, 1.8), new THREE.MeshStandardMaterial({ color: 0x1f2937 }));
+            roof.position.set(0, 2.5, -0.2);
+            fg.add(roof);
+
+            // Ko'tarish machtasi
+            const mast = new THREE.Mesh(new THREE.BoxGeometry(0.8, mastHeight, 0.2), new THREE.MeshStandardMaterial({ color: 0x374151 }));
+            mast.position.set(0, mastHeight / 2, 1.2);
+            fg.add(mast);
+
+            // Vilka (Forks) va yuklangan pallet
+            const pal = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.12, 1.2), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+            pal.position.set(0, 1.2, 1.9);
+            const box = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: 0x38bdf8 }));
+            box.position.set(0, 1.8, 1.9);
+            fg.add(pal, box);
+
+            fg.position.set(x, y, z);
+            scene3D.add(fg);
+        }
+
+        function buildUFlowPath() {
+            // U-simon traektoriya nuqtalari
+            const curve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(-35, 1.2, -18), // Qabul rampa
+                new THREE.Vector3(-32, 1.2, -5),  // Qabul bufer
+                new THREE.Vector3(-20, 1.2, 12),  // Saqlashga kirish
+                new THREE.Vector3(0, 1.2, 14),    // Markaziy asosiy magistral
+                new THREE.Vector3(20, 1.2, 12),   // Saqlashdan chiqish
+                new THREE.Vector3(34, 1.2, 4),    // Butlash - Picking
+                new THREE.Vector3(35, 1.2, -8),   // Jo'natish buferi
+                new THREE.Vector3(35, 1.2, -18)   // Jo'natish rampasi
+            ]);
+
+            // Truba (Tube)
+            const tubeGeo = new THREE.TubeGeometry(curve, 64, 0.25, 8, false);
+            const tubeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.65 });
+            const tube = new THREE.Mesh(tubeGeo, tubeMat);
+            scene3D.add(tube);
+
+            // Harakatlanuvchi nur zarrachalari (Glowing particles)
+            for (let i = 0; i < 12; i++) {
+                const pMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 12, 12),
+                    new THREE.MeshBasicMaterial({ color: 0x10b981 })
+                );
+                scene3D.add(pMesh);
+                flowParticles.push({
+                    mesh: pMesh,
+                    progress: i / 12,
+                    curve: curve
+                });
+            }
+        }
+
+        function animate3D() {
+            animId3D = requestAnimationFrame(animate3D);
+
+            // Zarrachalar harakati
+            flowParticles.forEach(p => {
+                p.progress += 0.0035;
+                if (p.progress > 1) p.progress = 0;
+                const pos = p.curve.getPoint(p.progress);
+                p.mesh.position.copy(pos);
+            });
+
+            // Avto-aylanish
+            if (controls3D) {
+                controls3D.autoRotate = autoRotate3D;
+                controls3D.autoRotateSpeed = 0.8;
+                controls3D.update();
+            }
+
+            if (renderer3D && scene3D && camera3D) {
+                renderer3D.render(scene3D, camera3D);
+            }
+        }
+
+        function on3DResize() {
+            const canvas = document.getElementById('warehouse-3d-canvas');
+            if (!canvas || !renderer3D || !camera3D) return;
+            const width = canvas.parentElement.clientWidth || 700;
+            const height = canvas.parentElement.clientHeight || 420;
+            camera3D.aspect = width / height;
+            camera3D.updateProjectionMatrix();
+            renderer3D.setSize(width, height);
+        }
+
+        window.addEventListener('resize', on3DResize);
+
+        // Kamera rakurslari
+        function setCameraView(viewType) {
+            autoRotate3D = false;
+            if (viewType === 'iso') {
+                camera3D.position.set(-75, 65, 80);
+                controls3D.target.set(0, 0, 0);
+            } else if (viewType === 'top') {
+                camera3D.position.set(0, 115, 0.1);
+                controls3D.target.set(0, 0, 0);
+            } else if (viewType === 'docks') {
+                camera3D.position.set(0, 22, -65);
+                controls3D.target.set(0, 4, -20);
+            } else if (viewType === 'racks') {
+                camera3D.position.set(0, 12, 28);
+                controls3D.target.set(0, 6, 0);
+            }
+            controls3D.update();
+        }
+
+        function toggleAutoRotate() {
+            autoRotate3D = !autoRotate3D;
+            const btn = document.getElementById('btn-toggle-rotate');
+            if (autoRotate3D) {
+                btn.classList.add('text-emerald-400');
+                btn.classList.remove('text-slate-400');
+            } else {
+                btn.classList.remove('text-emerald-400');
+                btn.classList.add('text-slate-400');
+            }
+        }
+
+        function focus3DZone(key) {
+            autoRotate3D = false;
+            if (key === 'receiving') {
+                camera3D.position.set(-55, 30, 20);
+                controls3D.target.set(-35, 2, -10);
+            } else if (key === 'storage') {
+                camera3D.position.set(0, 45, 55);
+                controls3D.target.set(0, 5, 0);
+            } else if (key === 'picking') {
+                camera3D.position.set(55, 30, 30);
+                controls3D.target.set(35, 2, 6);
+            } else if (key === 'shipping') {
+                camera3D.position.set(55, 28, -25);
+                controls3D.target.set(35, 2, -12);
+            } else if (key === 'admin') {
+                camera3D.position.set(-50, 25, 40);
+                controls3D.target.set(-35, 2, 12);
+            }
+            controls3D.update();
+        }
+
+        // 4. MATRITSA BO'YICHA MA'LUMOT
+        const matrixData = {
+            AX: {
+                title: "AX — Oltin Zona (Yuqori aylanma, barqaror talab)",
+                desc: "43\"-55\" Smart TVlar, 2 kamerali No-Frost muzlatkichlar va avtomat kir yuvish mashinalari. Tovar aylanmasining 80% drayveri. Jo'natish doklariga eng yaqin 1-2 yaruslarga joylashtiriladi.",
+                action: "Boshqaruv usuli: Kunlik JIT to'ldirish, minimal xavfsizlik zaxirasi (2-3 kunlik)."
+            },
+            AY: {
+                title: "AY — Mavsumiy Pik (Yuqori hajm, o'zgaruvchan talab)",
+                desc: "Konditsionerlar (yozda pik) va isitgichlar (qishda pik). Mavsumdan 20 kun oldin quyi yarusdagi bufer zonalarga jamlanadi.",
+                action: "Boshqaruv usuli: Mavsumiy buyurtma prognozi, har haftalik zaxira tekshiruvi."
+            },
+            AZ: {
+                title: "AZ — Xavfli Yuqori Aylanma (Tasodifiy katta xaridlar)",
+                desc: "Katta aksiyalar va chegirma paketlaridagi texnikalar. Talab to'satdan ortishi sababli doimiy monitor qilinadi.",
+                action: "Boshqaruv usuli: Konsolidatsiyalangan tezkor ta'minot shartnomalari."
+            },
+            BX: {
+                title: "BX — Standart Aylanma (O'rtacha hajm, barqaror)",
+                desc: "Mikroto'lqinli pechlar, changyutgichlar, blenderlar va elektr dazmollar. Omborda markaziy qatorlardagi 2-3 yaruslarga qo'yiladi.",
+                action: "Boshqaruv usuli: Standart 10-14 kunlik xavfsizlik zaxirasi."
+            },
+            BY: {
+                title: "BY — Mavsumiy O'rtacha Tovarlar",
+                desc: "Moyli radiatorlar, namlagichlar, ventilyatorlar. Yil fasliga qarab joylashuvi WMS orqali dinamik ko'chiriladi.",
+                action: "Boshqaruv usuli: Fursatli rotatsiya va mavsumiy chegirmalar."
+            },
+            BZ: {
+                title: "BZ — Tasodifiy O'rtacha Tovarlar",
+                desc: "Maxsus oshxona kombaynlari, qimmatroq changyutgich modellari. Yuqori yaruslarga saqlashga qo'yiladi.",
+                action: "Boshqaruv usuli: Buyurtmaga qarab oraliq to'ldirish."
+            },
+            CX: {
+                title: "CX — Kichik Doimiy Zaxira",
+                desc: "Ehtiyot qismlar, filtrlar, televizor pultlari va kabellar. Gravitatsion mayda yacheykalarda saqlanadi.",
+                action: "Boshqaruv usuli: Oylik o'zgarmas partiyalar."
+            },
+            CY: {
+                title: "CY — Kam Aylanuvchi Mavsumiy Aksessuarlar",
+                desc: "Konditsioner qishki g'iloflari, maxsus montaj burchaklari. Omborning to'ridagi 4-yaruslarga qo'yiladi.",
+                action: "Boshqaruv usuli: Minimal buyurtma nuqtasi."
+            },
+            CZ: {
+                title: "CZ — Muzlagan Zaxira (Qimmatbaho nodir tovarlar)",
+                desc: "85\" dyuymli 8K OLED televizorlar, vino sovutgich shkaflari. Omborning eng to'ridagi 5-yarusiga joylashtiriladi.",
+                action: "Boshqaruv usuli: Faqat mijozning qat'iy buyurtmasi bo'yicha yetkazib berish (Deliver-to-Order)."
+            }
+        };
+
+        function showMatrixDetail(code) {
+            const item = matrixData[code];
+            if (!item) return;
+            document.getElementById('matrix-title').innerText = item.title;
+            document.getElementById('matrix-desc').innerText = item.desc;
+            document.getElementById('matrix-action').innerText = item.action;
+        }
+
+        // 5. SKU BAZASI
+        const skuDatabase = [
+            { name: "Smart TV Artel 43\" Full HD", cat: "Audio-Video (CE)", abc: "A", xyz: "X", code: "A-01-01-1", zone: "Oltin zona (1-yarus)", sales: "1,240 dona" },
+            { name: "Samsung No-Frost 320L Muzlatkich", cat: "Katta Texnika (MDA)", abc: "A", xyz: "X", code: "P-02-01-1", zone: "Polli blok (Rampaga yaqin)", sales: "820 dona" },
+            { name: "LG Inverter 12-Split Konditsioner", cat: "Iqlim (HVAC)", abc: "A", xyz: "Y", code: "A-02-02-2", zone: "1-2 yarus bufer", sales: "940 dona" },
+            { name: "Artel Avtomat Kir Yuvish Mashinasi 7kg", cat: "Katta Texnika (MDA)", abc: "A", xyz: "X", code: "P-01-01-2", zone: "Polli blok (1-seksiya)", sales: "760 dona" },
+            { name: "Mikroto'lqinli Pech Midea 20L", cat: "Mayda Texnika (SDA)", abc: "B", xyz: "X", code: "B-03-02-1", zone: "Markaziy (2-yarus)", sales: "390 dona" },
+            { name: "Changyutgich Philips PowerPro", cat: "Mayda Texnika (SDA)", abc: "B", xyz: "X", code: "B-04-03-2", zone: "Markaziy (3-yarus)", sales: "410 dona" },
+            { name: "Moyli Isitgich Polaris 9-seksiyali", cat: "Iqlim (HVAC)", abc: "B", xyz: "Y", code: "B-05-02-1", zone: "Markaziy (2-yarus)", sales: "310 dona" },
+            { name: "Elektr Choynak Tefal 1.7L", cat: "Mayda Texnika (SDA)", abc: "B", xyz: "X", code: "B-02-01-3", zone: "Gravitatsion tokcha", sales: "520 dona" },
+            { name: "Sony OLED 85\" 4K Premium TV", cat: "Audio-Video (CE)", abc: "C", xyz: "Z", code: "C-06-05-1", zone: "To'r / 5-yarus", sales: "18 dona" },
+            { name: "Vino Sovutgich Shkafi Dunavox", cat: "Katta Texnika (MDA)", abc: "C", xyz: "Z", code: "C-07-04-2", zone: "To'r / 4-yarus", sales: "12 dona" },
+            { name: "Konditsioner Mis Quvurlari 50m", cat: "Iqlim (HVAC)", abc: "C", xyz: "X", code: "K-01-01-1", zone: "Konsolli stellaj", sales: "45 o'ram" }
+        ];
+
+        function renderSkuTable(filter = 'all') {
+            const tbody = document.getElementById('sku-table-body');
+            tbody.innerHTML = '';
+            const filtered = filter === 'all' ? skuDatabase : skuDatabase.filter(s => s.abc === filter);
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                let badgeColor = item.abc === 'A' ? 'bg-emerald-100 text-emerald-800' :
+                                 item.abc === 'B' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-700';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-900">${item.name}</td>
+                    <td class="p-3 text-slate-500">${item.cat}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${item.abc}</span></td>
+                    <td class="p-3 font-semibold text-slate-600">${item.xyz}</td>
+                    <td class="p-3 font-mono font-bold text-blue-600">${item.code}</td>
+                    <td class="p-3 text-slate-600">${item.zone}</td>
+                    <td class="p-3 text-right font-bold text-slate-800">${item.sales}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable(type) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200";
+            });
+            event.target.className = "filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-white";
+            renderSkuTable(type);
+        }
+
+        // 6. KALKULYATOR MANTIQI
+        let currentShift = 2;
+
+        function setShift(shiftNum) {
+            currentShift = shiftNum;
+            const btn1 = document.getElementById('shift-btn-1');
+            const btn2 = document.getElementById('shift-btn-2');
+
+            if (shiftNum === 1) {
+                btn1.className = "p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50 text-xs font-extrabold text-blue-700 transition";
+                btn2.className = "p-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:border-blue-400 transition";
+            } else {
+                btn2.className = "p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50 text-xs font-extrabold text-blue-700 transition";
+                btn1.className = "p-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:border-blue-400 transition";
+            }
+            calculateWarehouse();
+        }
+
+        function calculateWarehouse() {
+            const area = parseInt(document.getElementById('input-area').value);
+            const flow = parseInt(document.getElementById('input-flow').value);
+            const tiers = parseInt(document.getElementById('input-tiers').value);
+
+            document.getElementById('val-area').innerText = `${area.toLocaleString()} m²`;
+            document.getElementById('val-flow').innerText = `${flow} pallet/kun`;
+            document.getElementById('val-tiers').innerText = `${tiers} Yarus (H=${tiers * 2.2}m)`;
+
+            const sReceiving = Math.round(area * 0.12);
+            const sStorage = Math.round(area * 0.55);
+            const sPicking = Math.round(area * 0.15);
+            const sShipping = Math.round(area * 0.11);
+            const sAdmin = Math.round(area * 0.07);
+
+            document.getElementById('calc-receiving').innerText = `${sReceiving.toLocaleString()} m²`;
+            document.getElementById('calc-storage').innerText = `${sStorage.toLocaleString()} m²`;
+            document.getElementById('calc-picking').innerText = `${sPicking.toLocaleString()} m²`;
+            document.getElementById('calc-shipping').innerText = `${sShipping.toLocaleString()} m²`;
+            document.getElementById('calc-admin').innerText = `${sAdmin.toLocaleString()} m²`;
+
+            document.getElementById('map-receiving-area').innerText = `${sReceiving} m²`;
+            document.getElementById('map-storage-area').innerText = `${sStorage} m²`;
+            document.getElementById('map-picking-area').innerText = `${sPicking} m²`;
+            document.getElementById('map-shipping-area').innerText = `${sShipping} m²`;
+            document.getElementById('map-admin-area').innerText = `${sAdmin} m²`;
+
+            const capacity = Math.round(sStorage * 1.545 * (tiers / 5));
+            document.getElementById('calc-capacity').innerText = capacity.toLocaleString();
+
+            const totalHours = currentShift * 8;
+            const reachTrucksNeeded = Math.max(2, Math.ceil((flow * 1.3) / (totalHours * 18 * 0.85)));
+            document.getElementById('calc-reach-trucks').innerText = `${reachTrucksNeeded} dona`;
+
+            const trucks = Math.ceil(flow / 28);
+            document.getElementById('calc-trucks-daily').innerText = `${trucks} fura/kun`;
+
+            const docksNeeded = Math.max(4, Math.ceil((trucks * 1.2) / (totalHours * 0.75)) * 2);
+            document.getElementById('calc-dock-doors').innerText = `${docksNeeded} dona`;
+
+            const capex = Math.round(area * 217.5);
+            document.getElementById('calc-capex').innerText = `$${capex.toLocaleString()}`;
+
+            const annualSavings = Math.round(area * 85);
+            const payback = (capex / annualSavings).toFixed(2);
+            document.getElementById('calc-payback').innerText = `${payback} yil`;
+
+            document.getElementById('card-total-area').innerHTML = `${area.toLocaleString()} <span class="text-lg font-semibold text-slate-500">m²</span>`;
+            document.getElementById('card-capacity').innerHTML = `${capacity.toLocaleString()} <span class="text-lg font-semibold text-slate-500">o'rin</span>`;
+            document.getElementById('card-daily-flow').innerHTML = `${Math.round(flow * 0.5)} - ${Math.round(flow * 0.65)} <span class="text-lg font-semibold text-slate-500">t/kun</span>`;
+        }
+
+        function resetCalculator() {
+            document.getElementById('input-area').value = 4000;
+            document.getElementById('input-flow').value = 240;
+            document.getElementById('input-tiers').value = 5;
+            setShift(2);
+        }
+
+        // 7. CHART.JS GRAFIKLARI
+        let zoneChartInstance = null;
+        let paretoChartInstance = null;
+
+        function initCharts() {
+            const ctxZone = document.getElementById('zoneChart').getContext('2d');
+            zoneChartInstance = new Chart(ctxZone, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Qabul qilish (12%)', 'Asosiy saqlash (55%)', 'Yig\'ish (15%)', 'Jo\'natish (11%)', 'Ma\'muriy (7%)'],
+                    datasets: [{
+                        data: [12, 55, 15, 11, 7],
+                        backgroundColor: ['#0284c7', '#4f46e5', '#f59e0b', '#e11d48', '#64748b'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '72%'
+                }
+            });
+
+            const ctxPareto = document.getElementById('paretoChart').getContext('2d');
+            paretoChartInstance = new Chart(ctxPareto, {
+                type: 'bar',
+                data: {
+                    labels: ['A Guruhi (Top 20%)', 'B Guruhi (O\'rta 30%)', 'C Guruhi (Qolgan 50%)'],
+                    datasets: [
+                        {
+                            label: 'Tovar Aylanmasi Ulushi (%)',
+                            data: [80, 15, 5],
+                            backgroundColor: ['#10b981', '#3b82f6', '#94a3b8'],
+                            borderRadius: 8,
+                            order: 2
+                        },
+                        {
+                            label: 'Kumulyativ Foiz (%)',
+                            data: [80, 95, 100],
+                            type: 'line',
+                            borderColor: '#f59e0b',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.2,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { callback: v => v + '%' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Dasturni ishga tushirish
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSkuTable();
+            initCharts();
+            calculateWarehouse();
+            init3DScene();
+        });
+    </script>
+</body>
+</html>
