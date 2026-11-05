@@ -384,6 +384,30 @@ $$\text{PP} = \frac{\text{CAPEX}}{\Delta \text{EBITDA}} = \frac{\$870,000}{\$340
 
 Diskontlangan qoplanish muddati (DPP, diskont stavkasi $r = 12\%$ bo'lganda): **3.1 yil**.
 
+### 7.3. WMS Avtomatlashtirish, Inbound RFID va Pick-by-Voice Moduli
+1. **Dok 1–4 Avtomatik Kirim Skaneri (UHF RFID & GS1-128)**: Furalardan palletlar tushirilganda portal darvozalaridagi UHF antennalar barcha 24 ta qutining individual seriya raqami va RFID teglarini 0.28 soniyada 100% aniqlik bilan skanerlaydi. Bu qabul qilish vaqtini an'anaviy qo'lda tekshirishga nisbatan 75% ga qisqartiradi.
+2. **Pick-by-Voice (Ovozli Butlash)**: Operator qo'llari va ko'zlari to'liq bo'sh bo'lgan holda quloqchin orqali WMS tizimidan o'zbek tilida aniq yo'lak, yacheyka va dona soni bo'yicha audio ko'rsatma oladi. Xatolik darajasi 0.08% dan pastga tushadi, terish unumdorligi esa 35% ga oshadi.
+
+### 7.4. Dinamik Slotting va Issiqlik Xaritasi (Heatmap)
+Tovar oqimining tezligiga mos ravishda ombor javonlari issiqlik xaritasi (Heatmap) asosida 3 ta hududga taqsimlangan:
+- **A-Toifa (Fast Movers — Qizil / Olovrang)**: 80% sotuv drayveri. Ekspeditsiya rampasiga eng yaqin A-qator 1-yarus va polli blok. Masofa: atigi 18 m, bitta tsikl vaqti: 1.2 daqiqa.
+- **B-Toifa (Medium Movers — Sariq)**: 15% talab. Markaziy B-qator va gravitatsion tokchalar (2-3 yarus). Masofa: 42 m, tsikl vaqti: 2.8 daqiqa.
+- **C-Toifa (Slow Movers — Sovuq Ko'k)**: 5% talab. Eng to'rdagi C-qator va 10.5 m balandlikdagi 4-5 yaruslar. Masofa: 76 m, tsikl vaqti: 4.9 daqiqa.
+
+### 7.5. Mehnat Muhofazasi (HSE) va Yashil Logistika (Green Warehouse)
+1. **ESFR Sprinkler Tizimi**: Shift tagida (11.2 m balandlikda) NFPA 13 standarti bo'yicha K-faktor 14.0 li purkagichlar tarmog'i o'rnatilgan bo'lib, daqiqasiga 380 litr bosimli suv oqimi bilan yong'in manbasini 90 soniyada o'chiradi.
+2. **Piyodalar Xavfsiz Yo'laklari va Blue Spot**: 1.2 m kenglikdagi sariq-yashil himoyalangan yo'laklar orqali piyodalar va elektro-texnikalar oqimi ajratilgan. Forkliftlar orqasidan polda 5 metr masofada ko'k lazer nuqtasi (Blue Safety Spot) tushib, xodimlarni ogohlantiradi.
+3. **Quyosh Fotoelektr Stansiyasi (Rooftop Solar PV)**: Ombor tomida 1,200 m² maydonda **180 kVt** quvvatli quyosh panellari o'rnatilgan. Oylik toza energiya generatsiyasi: **22,680 kVt*soat**, oylik tejamkorlik: **20.4 million so'm**, yillik CO₂ emissiyasi qisqarishi: **150 tonna**.
+
+### 7.6. Kengaytirilgan KPI va 1 m² Saqlash Xarajatlari (OPEX)
+1. **Order Fulfillment Cycle Time (OFCT)**: Buyurtmani qabul qilishdan rampaga yuklashgacha umumiy tsikl vaqti atigi **54 daqiqa** (WMS qabul — 3 min, to'lqinli terish — 24 min, sifat nazorati/qadoqlash — 15 min, staging/ortish — 12 min).
+2. **1 m² Saqlash Maydonining Oylik Xarajatlari**:
+   - Bino amortizatsiyasi/ijarasi: \$5.50 / m²
+   - Ish haqi fondi (31 xodim): \$3.20 / m²
+   - Kommunal va elektr (quyosh tejamkorligi bilan): \$0.85 / m²
+   - MHE lizingi va WMS IT litsenziyalari: \$1.45 / m²
+   - **Jami 1 m² oylik tannarxi: \$11.00 / m²** (Jami oylik OPEX: \$44,000 / oy; bitta pallet oylik saqlash xarajati: **\$12.94 / pallet**).
+
 ### Yakuniy xulosalar:
 1. Ishlab chiqilgan loyiha "TexnoLogistik" MChJ korxonasiga maishiy texnika va uy-ro'zg'or buyumlari distribyutsiyasida logistika zanjirining o'tkazuvchanlik qobiliyatini sutkasiga 312 palletgacha oshirish imkonini beradi.
 2. U-shaklidagi tovar oqimi va ABC-XYZ integratsiyasi ombor ichidagi transport traektoriyasini 41.6% ga qisqartirdi hamda qarama-qarshi oqimlar to'qnashuvini to'liq bartaraf etdi.
