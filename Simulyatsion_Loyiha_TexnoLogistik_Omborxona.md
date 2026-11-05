@@ -228,7 +228,7 @@ WMS tizimi quyidagi asosiy modullardan iborat:
 |  +--------------------+  +---------------------+  +----------------------------+  |
 |  | INBOUND MODULI     |  | STORAGE & SLOTTING  |  | OUTBOUND MODULI            |  |
 |  | - ASN bildirishnoma|  | - Dinamik manzil    |  | - To'lqinli yig'ish (Wave) |  |
-|  | - Palletlash       |  | - FIFO / FEFO nazorat|  | - Pick-by-Voice / RF-Pick  |  |
+|  | - Palletlash       |  | - FIFO / FEFO nazorat|  | - VMT & RF-Terminal (Pick)  |  |
 |  | - Dastlabki qabul  |  | - Siklik inventar   |  | - Qadoqlash va jo'natish   |  |
 |  +--------------------+  +---------------------+  +----------------------------+  |
 |                                                                                   |
@@ -272,7 +272,7 @@ flowchart TD
     subgraph REPLENISH ["3. KOMPLEKTATSIYA (PICKING) ZONASI"]
         B2 -->|WMS to'ldirish signali| C1[Quyi yaruslarga tushirish]
         C1 --> C2[Gravitatsion tokchalar / Carton Flow]
-        C2 --> C3[Buyurtmalarni yig'ish: Pick-by-Voice]
+        C2 --> C3[Buyurtmalarni yig'ish: VMT & RF-Terminal]
     end
 
     subgraph OUTBOUND ["4. JO'NATISh VA EKSPEDITSIYA (Dok 5-8)"]
@@ -384,9 +384,9 @@ $$\text{PP} = \frac{\text{CAPEX}}{\Delta \text{EBITDA}} = \frac{\$870,000}{\$340
 
 Diskontlangan qoplanish muddati (DPP, diskont stavkasi $r = 12\%$ bo'lganda): **3.1 yil**.
 
-### 7.3. WMS Avtomatlashtirish, Inbound RFID va Pick-by-Voice Moduli
+### 7.3. WMS Avtomatlashtirish, Inbound RFID va Forklift Bort Terminali (VMT) Moduli
 1. **Dok 1–4 Avtomatik Kirim Skaneri (UHF RFID & GS1-128)**: Furalardan palletlar tushirilganda portal darvozalaridagi UHF antennalar barcha 24 ta qutining individual seriya raqami va RFID teglarini 0.28 soniyada 100% aniqlik bilan skanerlaydi. Bu qabul qilish vaqtini an'anaviy qo'lda tekshirishga nisbatan 75% ga qisqartiradi.
-2. **Pick-by-Voice (Ovozli Butlash)**: Operator qo'llari va ko'zlari to'liq bo'sh bo'lgan holda quloqchin orqali WMS tizimidan o'zbek tilida aniq yo'lak, yacheyka va dona soni bo'yicha audio ko'rsatma oladi. Xatolik darajasi 0.08% dan pastga tushadi, terish unumdorligi esa 35% ga oshadi.
+2. **Forklift Bort Terminali (VMT - Vehicle Mounted Terminal)**: Maishiy texnika ombori xususiyatlariga to'liq moslashtirilgan sanoat planshetlari orqali Reach-truck va Forklift operatorlariga WMS topshiriqlari (Putaway, Replenishment, Outbound Picking) avtomatik yo'naltiriladi. Haydovchi uzoq masofali Bluetooth shtrix-kod skaneri orqali yacheykani tasdiqlaydi, bu og'ir maishiy texnika logistikasida inson xatolarini 99.8% ga bartaraf qiladi.
 
 ### 7.4. Dinamik Slotting va Issiqlik Xaritasi (Heatmap)
 Tovar oqimining tezligiga mos ravishda ombor javonlari issiqlik xaritasi (Heatmap) asosida 3 ta hududga taqsimlangan:

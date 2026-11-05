@@ -498,7 +498,7 @@
                                             <p class="text-xs text-amber-300 font-medium" id="map-picking-area">600 m²</p>
                                         </div>
                                         <div class="text-[10px] text-amber-200/80">
-                                            Gravitatsion tokchalar & Pick-by-Voice
+                                            Gravitatsion tokchalar & VMT Dispetcher
                                         </div>
                                     </div>
 
@@ -756,50 +756,14 @@
                         <p class="text-xs text-slate-500 mt-0.5">Ixtiyoriy WMS yacheyka manziliga bosing — 3D ombor kamerasi o'sha yacheykaga avtomatik yaqinlashadi va ko'rsatadi!</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <button onclick="exportSkuCsv()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1 shadow-sm" title="Jadvaldagi tovarlarni Excel/CSV formatida yuklab olish">
-                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Excel (CSV)
-                        </button>
-                        <button onclick="toggleAddSkuForm()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition flex items-center gap-1 shadow-sm" title="Yangi tovar kiritish">
-                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Yangi Tovar
+                        <button onclick="exportSkuCsv()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-sm" title="Jadvaldagi tovarlarni Excel/CSV formatida yuklab olish">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Excel (CSV) Yuklash
                         </button>
                         <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
                         <button onclick="filterTable('all')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-white">Hammasi</button>
                         <button onclick="filterTable('A')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">A Guruhi</button>
                         <button onclick="filterTable('B')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">B Guruhi</button>
                         <button onclick="filterTable('C')" class="filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">C Guruhi</button>
-                    </div>
-                </div>
-
-                <!-- YANGI TOVAR QO'SHISH FORMASI (WMS SKU IMPORT) -->
-                <div id="add-sku-panel" class="hidden p-4 bg-blue-50/70 border-b border-blue-200 text-xs">
-                    <div class="font-bold text-slate-800 mb-2 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5 text-blue-900">
-                            <i data-lucide="package-plus" class="w-4 h-4 text-blue-600"></i>
-                            WMS Bazaga Yangi Tovar Qo'shish:
-                        </span>
-                        <button onclick="toggleAddSkuForm()" class="text-slate-400 hover:text-slate-600">&times; Yopish</button>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-6 gap-2">
-                        <input id="new-sku-name" type="text" placeholder="Mahsulot nomi (masalan: Changyutgich Bosch)" class="sm:col-span-2 p-2 rounded-lg border border-slate-300 text-xs bg-white">
-                        <select id="new-sku-cat" class="p-2 rounded-lg border border-slate-300 text-xs bg-white">
-                            <option value="Mayda Texnika (SDA)">Mayda Texnika (SDA)</option>
-                            <option value="Katta Texnika (MDA)">Katta Texnika (MDA)</option>
-                            <option value="Audio-Video (CE)">Audio-Video (CE)</option>
-                            <option value="Iqlim (HVAC)">Iqlim (HVAC)</option>
-                        </select>
-                        <select id="new-sku-abc" class="p-2 rounded-lg border border-slate-300 text-xs bg-white">
-                            <option value="A">A Guruhi (80%)</option>
-                            <option value="B" selected>B Guruhi (15%)</option>
-                            <option value="C">C Guruhi (5%)</option>
-                        </select>
-                        <input id="new-sku-code" type="text" placeholder="Yacheyka (masalan: B-02-02-1)" class="p-2 rounded-lg border border-slate-300 text-xs font-mono bg-white">
-                        <input id="new-sku-sales" type="text" placeholder="Oylik sotuv (masalan: 320 dona)" class="p-2 rounded-lg border border-slate-300 text-xs bg-white">
-                    </div>
-                    <div class="flex justify-end gap-2 mt-2.5">
-                        <button onclick="toggleAddSkuForm()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-200">Bekor qilish</button>
-                        <button onclick="addNewSku()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1 shadow">
-                            <i data-lucide="check" class="w-3.5 h-3.5"></i> Bazaga Kiritish
-                        </button>
                     </div>
                 </div>
 
@@ -1025,7 +989,7 @@
                             <i data-lucide="terminal" class="w-3.5 h-3.5 text-blue-600"></i>
                             <span>Smart WMS Avtomatlashtirish Moduli</span>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900">Avtomatik Kirim Skaneri (Dok 1-4) & Pick-by-Voice Interaktiv Simulyatori</h3>
+                        <h3 class="text-lg font-bold text-slate-900">Avtomatik Kirim Skaneri (Dok 1-4) & WMS Forklift Bort Terminali (VMT)</h3>
                     </div>
                     <span class="text-xs text-slate-400 font-semibold">Real-vaqtli simulyatsiya</span>
                 </div>
@@ -1066,50 +1030,43 @@
                         </button>
                     </div>
 
-                    <!-- B: Pick-by-Voice va RF-Terminal Simulyatori -->
+                    <!-- B: Reach-truck va Forklift Bort Kompyuteri (VMT) Dispetcheri -->
                     <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-950 text-white border border-indigo-900/60 space-y-4 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Pick-by-Voice Garniturasi</span>
-                                <span class="text-[11px] text-amber-300 font-mono">Hands-Free Audio</span>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Forklift Bort Terminali (VMT)</span>
+                                <span class="text-[11px] text-emerald-400 font-mono flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> WMS Wi-Fi 6 Online
+                                </span>
                             </div>
-                            <h4 class="font-bold text-base text-white mt-2">Ovozli Buyurtma Butlash (Voice Picking)</h4>
-                            <p class="text-xs text-slate-300 mt-1">Operator ko'zlari va qo'llari bo'sh bo'ladi. WMS buyruqlarni quloqchin orqali o'zbek tilida beradi.</p>
+                            <h4 class="font-bold text-base text-white mt-2">Texnika Vazifalar Dispetcheri (Task Dispatch)</h4>
+                            <p class="text-xs text-slate-300 mt-1">Reach-truck va Forklift planshet ekrani: yacheykalarga joylashtirish (putaway) va yuklash topshiriqlari avtomatik keladi.</p>
 
-                            <!-- Ekvalayzer va Dialog oynasi -->
-                            <div class="mt-4 p-3.5 rounded-xl bg-slate-900/90 border border-indigo-800/80 space-y-3">
-                                <!-- Audio visualizer wave bar -->
-                                <div class="flex items-center justify-center gap-1.5 h-6">
-                                    <span class="w-1.5 h-3 bg-indigo-400 rounded-full animate-pulse"></span>
-                                    <span class="w-1.5 h-6 bg-blue-400 rounded-full animate-bounce"></span>
-                                    <span class="w-1.5 h-4 bg-emerald-400 rounded-full animate-pulse"></span>
-                                    <span class="w-1.5 h-5 bg-purple-400 rounded-full animate-bounce"></span>
-                                    <span class="w-1.5 h-2 bg-indigo-400 rounded-full animate-pulse"></span>
+                            <!-- VMT Tablet Ekrani -->
+                            <div class="mt-4 p-3.5 rounded-xl bg-slate-900 border border-indigo-800/80 space-y-2.5 font-mono text-xs">
+                                <div class="flex justify-between items-center border-b border-indigo-800/60 pb-1.5 text-[11px]">
+                                    <span class="text-indigo-400 font-bold flex items-center gap-1.5">
+                                        <i data-lucide="tablet" class="w-3.5 h-3.5"></i> VMT #02 (Reach-truck)
+                                    </span>
+                                    <span id="vmt-task-type" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">PUTAWAY (Joylash)</span>
                                 </div>
 
-                                <div class="p-2.5 rounded-lg bg-indigo-900/40 border border-indigo-700/50 text-xs space-y-1">
-                                    <div class="text-[10px] text-indigo-300 font-bold uppercase tracking-wider flex items-center gap-1">
-                                        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> WMS Ovozli Buyruq:
-                                    </div>
-                                    <p id="voice-wms-msg" class="text-emerald-300 font-semibold font-mono text-xs">
-                                        "Yo'lak B-03, Stellaj 2, Yarus 1 ga boring. Tekshiruv kodi: 48"
-                                    </p>
-                                </div>
-
-                                <div class="text-[11px] text-slate-300 flex items-center justify-between">
-                                    <span>Operator Javobi:</span>
-                                    <span id="voice-operator-msg" class="text-amber-300 font-mono font-bold">"Tekshiruv kodi 48"</span>
+                                <div class="space-y-1.5 text-[11px]">
+                                    <div class="text-slate-400">Manzil Yacheyka: <span id="vmt-slot" class="text-emerald-400 font-bold text-xs">Yo'lak B-03, Stellaj 2, Yarus 3 (B-03-02-3)</span></div>
+                                    <div class="text-slate-400">Mahsulot: <span id="vmt-prod" class="text-sky-300 font-bold">Samsung No-Frost 320L Muzlatkich (12 dona)</span></div>
+                                    <div class="text-slate-400">SSCC Taglik: <span id="vmt-sscc" class="text-purple-300 font-mono">(00) 1 4789012 884729103 1</span></div>
+                                    <div class="text-slate-400">Optik Skaner: <span id="vmt-scan" class="text-emerald-400 font-bold">Yacheyka shtrix-kodi tasdiqlandi (Match 100%)</span></div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 mt-3">
-                            <button id="btn-voice-step" onclick="simulateVoiceStep()" 
+                            <button id="btn-vmt-step" onclick="simulateVmtStep()" 
                                     class="py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-xs text-white shadow-lg transition flex items-center justify-center gap-1.5">
-                                <i data-lucide="mic" class="w-4 h-4 text-emerald-400"></i>
-                                <span id="voice-step-btn-text">Keyingi Buyruq</span>
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                                <span id="vmt-step-btn-text">Vazifani Bajarish</span>
                             </button>
-                            <button onclick="resetVoiceSimulation()" 
+                            <button onclick="resetVmtSimulation()" 
                                     class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">
                                 Qaytadan
                             </button>
@@ -1752,7 +1709,7 @@
                 desc: "Chakana va ulgurji tarmoqlar buyurtmalarini tezkor to'plash, donalab va qutilab komonovka qilish. Mayda maishiy texnika uchun gravitatsion tokchalar (Carton Flow) va qadoqlash stollari.",
                 equipment: [
                     "Gravitatsion rolikli Carton Flow tokchalari",
-                    "Pick-by-Voice ovozli buyurtma terish garniturasi",
+                    "WMS mobil terminali va shtrix-kodli halqa-skanerlar (Ring Scanners)",
                     "6 ta qo'l gidravlik roklasi va aravachalar",
                     "Avtomatlashtirilgan strech-plyonka o'rash mashinasi"
                 ],
@@ -2877,44 +2834,70 @@
         }
 
         // ==========================================
-        // 2. PICK-BY-VOICE OVOZLI BUTLASH SIMULYATSIYASI
+        // 2. FORKLIFT BORT TERMINALI (VMT) DISPETCHERI
         // ==========================================
-        let voiceStep = 1;
-        const voiceDialogs = [
+        let vmtStep = 1;
+        const vmtTasks = [
             {
-                wms: "\"Yo'lak B-03, Stellaj 2, Yarus 1 ga boring. Tekshiruv kodi: 48\"",
-                op: "\"Tekshiruv kodi 48\"",
-                nextBtn: "Tovarni tasdiqlash"
+                type: "PUTAWAY (Joylash)",
+                typeClass: "bg-amber-500/20 text-amber-300 border border-amber-500/30",
+                slot: "Yo'lak B-03, Stellaj 2, Yarus 3 (B-03-02-3)",
+                prod: "Samsung No-Frost 320L Muzlatkich (12 dona)",
+                sscc: "(00) 1 4789012 884729103 1",
+                scan: "Yacheyka shtrix-kodi tasdiqlandi (Match 100%)",
+                btn: "Topshiriqni Bajarish"
             },
             {
-                wms: "\"To'g'ri. 4 dona Mikroto'lqinli Pech Midea oling\"",
-                op: "\"4 dona olindi\"",
-                nextBtn: "Butlashni yakunlash"
+                type: "REPLENISHMENT (To'ldirish)",
+                typeClass: "bg-purple-500/20 text-purple-300 border border-purple-500/30",
+                slot: "Yo'lak A-01, Stellaj 1, Yarus 1 (A-01-01-1)",
+                prod: "Smart TV Artel 43\" Full HD (24 dona)",
+                sscc: "(00) 1 4789012 345678901 8",
+                scan: "Oltin zonaga tushirildi va tasdiqlandi",
+                btn: "Keyingi Topshiriq"
             },
             {
-                wms: "\"Ajoyib! Buyurtma to'liq yig'ildi. Ekspeditsiya 2-konteyneriga olib boring\"",
-                op: "\"Staging 2 ga yetkazildi\"",
-                nextBtn: "Yangi buyurtma olish"
+                type: "PICKING (Jo'natishga Yig'ish)",
+                typeClass: "bg-sky-500/20 text-sky-300 border border-sky-500/30",
+                slot: "Dok 7 / Jo'natish Ekspeditsiyasi (Staging 3)",
+                prod: "LG Inverter 12 Konditsioner (16 dona)",
+                sscc: "(00) 1 4789012 990182736 4",
+                scan: "Fura rampasiga yuklandi (Ready for Shipping)",
+                btn: "Yangi Marshrut Olish"
             }
         ];
 
-        function simulateVoiceStep() {
-            voiceStep++;
-            if (voiceStep > voiceDialogs.length) {
-                voiceStep = 1;
+        function simulateVmtStep() {
+            vmtStep++;
+            if (vmtStep > vmtTasks.length) {
+                vmtStep = 1;
             }
-            const cur = voiceDialogs[voiceStep - 1];
-            document.getElementById('voice-wms-msg').innerText = cur.wms;
-            document.getElementById('voice-operator-msg').innerText = cur.op;
-            document.getElementById('voice-step-btn-text').innerText = cur.nextBtn;
+            const cur = vmtTasks[vmtStep - 1];
+            const typeEl = document.getElementById('vmt-task-type');
+            if (typeEl) {
+                typeEl.innerText = cur.type;
+                typeEl.className = `px-2 py-0.5 rounded font-bold ${cur.typeClass}`;
+            }
+            document.getElementById('vmt-slot').innerText = cur.slot;
+            document.getElementById('vmt-prod').innerText = cur.prod;
+            document.getElementById('vmt-sscc').innerText = cur.sscc;
+            document.getElementById('vmt-scan').innerText = cur.scan;
+            document.getElementById('vmt-step-btn-text').innerText = cur.btn;
         }
 
-        function resetVoiceSimulation() {
-            voiceStep = 1;
-            const cur = voiceDialogs[0];
-            document.getElementById('voice-wms-msg').innerText = cur.wms;
-            document.getElementById('voice-operator-msg').innerText = cur.op;
-            document.getElementById('voice-step-btn-text').innerText = "Keyingi Buyruq";
+        function resetVmtSimulation() {
+            vmtStep = 1;
+            const cur = vmtTasks[0];
+            const typeEl = document.getElementById('vmt-task-type');
+            if (typeEl) {
+                typeEl.innerText = cur.type;
+                typeEl.className = `px-2 py-0.5 rounded font-bold ${cur.typeClass}`;
+            }
+            document.getElementById('vmt-slot').innerText = cur.slot;
+            document.getElementById('vmt-prod').innerText = cur.prod;
+            document.getElementById('vmt-sscc').innerText = cur.sscc;
+            document.getElementById('vmt-scan').innerText = cur.scan;
+            document.getElementById('vmt-step-btn-text').innerText = "Vazifani Bajarish";
         }
 
         // ==========================================
@@ -3020,35 +3003,6 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }
-
-        function toggleAddSkuForm() {
-            const panel = document.getElementById('add-sku-panel');
-            if (panel) panel.classList.toggle('hidden');
-        }
-
-        function addNewSku() {
-            const name = document.getElementById('new-sku-name').value.trim();
-            const cat = document.getElementById('new-sku-cat').value;
-            const abc = document.getElementById('new-sku-abc').value;
-            const code = document.getElementById('new-sku-code').value.trim() || 'B-02-02-1';
-            const sales = document.getElementById('new-sku-sales').value.trim() || '250 dona';
-
-            if (!name) {
-                alert("Iltimos, mahsulot nomini kiriting!");
-                return;
-            }
-
-            const xyz = (abc === 'A') ? 'X' : (abc === 'B' ? 'Y' : 'Z');
-            const zone = (abc === 'A') ? 'Oltin zona (1-yarus)' : (abc === 'B' ? 'Markaziy (2-yarus)' : 'To\'r / 4-yarus');
-
-            skuDatabase.unshift({ name, cat, abc, xyz, code, zone, sales });
-            renderSkuTable();
-            toggleAddSkuForm();
-
-            document.getElementById('new-sku-name').value = '';
-            document.getElementById('new-sku-code').value = '';
-            document.getElementById('new-sku-sales').value = '';
         }
 
         // ==========================================
