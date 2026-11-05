@@ -44,11 +44,34 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        /* Barcha elementlar uchun matn kursori (I-beam) o'rniga standart kursor ko'rsatish */
+        *, *::before, *::after {
+            cursor: default;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
             color: #1e293b;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
+
+        /* Barcha interaktiv elementlar, tugmalar, havolalar, slayderlar uchun qo'lcha kursori */
+        a, button, input[type="range"], select, [onclick], .zone-box, .filter-btn, .cursor-pointer {
+            cursor: pointer !important;
+        }
+
+        /* Agar matn kiritish maydoni bo'lsa, u yerda matn kursori va tanlash imkoni qolsin */
+        input[type="text"], input[type="number"], textarea {
+            cursor: text !important;
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
@@ -63,10 +86,10 @@
         }
         #warehouse-3d-canvas {
             outline: none;
-            cursor: grab;
+            cursor: grab !important;
         }
         #warehouse-3d-canvas:active {
-            cursor: grabbing;
+            cursor: grabbing !important;
         }
     </style>
 </head>
