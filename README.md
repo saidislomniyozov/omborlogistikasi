@@ -29,13 +29,11 @@ Ushbu loyiha **"TexnoLogistik" MChJ** — maishiy texnika va uy-ro'zg'or buyumla
    - **🎬 Virtual Ekskursiya (Guided Tour):** Himoya va taqdimotlar uchun 6 qadamli avtomatik kamera ekskursiyasi (HUD banner va avto-pleyer bilan).
 2. **WMS Buyurtma Yig'ish (Picker Routing) Simulyatori:**
    - S-Shape (ilon izi) marshrutlash algoritmi, operator bosib o'tadigan masofa va vaqt tejamkorligini (+51.7%) hisoblovchi interaktiv 2D SVG simulyator.
-3. **AnyLogic 8 Professional Modeli (.ALP) Integratsiyasi:**
-   - Diskret-voqeaviy va agentli simulyatsiya modeli (`Ombor logistikasi.alp`), Puasson oqimlari va resurs yuklamalari tahlili.
-4. **ABC-XYZ Slotting Matritsasi:**
+3. **ABC-XYZ Slotting Matritsasi:**
    - 9 segmentli interaktiv matritsa, Pareto diagrammasi va tovarlar joylashuv manzillari (`A-01-01-1`).
-5. **Jonli Muhandislik Kalkulyatori va Yashil Logistika:**
+4. **Jonli Muhandislik Kalkulyatori va Yashil Logistika:**
    - Maydon, kunlik palletlar va yaruslarni o'zgartirib, barcha logistika ko'rsatkichlarini avtomatik hisoblash hamda 180 kVt quyosh panellari tejamkorligi tahlili.
-6. **Rasmiy PDF va Excel Eksport:**
+5. **Rasmiy PDF va Excel Eksport:**
    - Barcha texnik-iqtisodiy ko'rsatkichlar va hisob-kitoblarni rasmiy A4 PDF (chop etish) va Excel (.csv) formatida bir tugma bilan yuklab olish.
 
 ---
