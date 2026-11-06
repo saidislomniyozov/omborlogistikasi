@@ -130,13 +130,21 @@
                     <a href="#kpi-dashboard" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/80 transition">KPI & Moliyaviy</a>
                 </nav>
 
-                <!-- Status belgisi va tezkor tugma -->
-                <div class="flex items-center space-x-3">
-                    <div class="hidden sm:flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs">
+                <!-- Status belgisi va tezkor harakatlar -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <button onclick="startGuidedTour()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition transform active:scale-95" title="Virtual 3D Taqdimot va Ekskursiya">
+                        <i data-lucide="play-circle" class="w-4 h-4"></i>
+                        <span>3D Taqdimot</span>
+                    </button>
+                    <button onclick="openProjectPdfReport()" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold border border-slate-700 transition" title="Rasmiy PDF Hisobot">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-400"></i>
+                        <span>PDF Hisobot</span>
+                    </button>
+                    <div class="hidden lg:flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                         <span class="text-slate-300">WebGL 3D Faol</span>
                     </div>
-                    <button onclick="window.print()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Hisobotni chop etish / PDF">
+                    <button onclick="openProjectPdfReport()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Hisobotni ko'rish / Chop etish (PDF)">
                         <i data-lucide="printer" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -314,6 +322,14 @@
 
                             <!-- Kamera Rakurslari va Modul Tugmalari -->
                             <div class="flex flex-wrap items-center gap-1.5">
+                                <button onclick="startGuidedTour()" id="btn-guided-tour" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold flex items-center gap-1 shadow-md shadow-blue-500/20 transition active:scale-95" title="Kafedra / Hay'at oldida himoya uchun avtomatik virtual ekskursiya">
+                                    <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                                    <span>🎬 Taqdimot</span>
+                                </button>
+                                <button id="btn-toggle-sim" onclick="toggleMheSimulation()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white transition font-semibold flex items-center gap-1 border border-emerald-500/30" title="MHE texnikalar (Reach-truck, Forklift) dinamik harakatini yoqish/o'chirish">
+                                    <i data-lucide="play" class="w-3.5 h-3.5" id="sim-icon"></i>
+                                    <span id="sim-btn-text">Harakat: ON</span>
+                                </button>
                                 <button onclick="setCameraView('iso')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition font-semibold" title="Izometrik burchak">
                                     🎥 Izometriya
                                 </button>
@@ -335,12 +351,51 @@
                                 <button id="btn-toggle-rotate" onclick="toggleAutoRotate()" class="p-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white transition" title="Avto-aylanish">
                                     <i data-lucide="rotate-cw" class="w-4 h-4"></i>
                                 </button>
+                                <button onclick="toggle3DFullscreen()" class="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="To'liq ekranda ochish">
+                                    <i data-lucide="maximize" class="w-4 h-4"></i>
+                                </button>
                             </div>
                         </div>
 
                         <!-- Three.js Canvas Maydoni -->
-                        <div class="relative w-full h-[380px] sm:h-[420px] rounded-xl overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-800">
+                        <div id="warehouse-3d-box" class="relative w-full h-[380px] sm:h-[440px] rounded-xl overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border border-slate-800">
                             <canvas id="warehouse-3d-canvas" class="w-full h-full block"></canvas>
+
+                            <!-- GUIDED TOUR (VIRTUAL TAQDIMOT) OVERLAY HUD -->
+                            <div id="guided-tour-overlay" class="hidden absolute top-3 left-3 right-3 sm:left-6 sm:right-6 p-4 rounded-2xl bg-slate-900/95 border-2 border-blue-500 text-white shadow-2xl backdrop-blur-md z-30 transition-all">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center font-extrabold text-white text-xs shadow-lg shadow-blue-500/30">
+                                            <span id="tour-step-badge">1/6</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] uppercase font-bold tracking-wider text-blue-400 block">Virtual Taqdimot Ekskursiyasi</span>
+                                            <h3 class="font-extrabold text-sm sm:text-base text-white" id="tour-step-title">Umumiy Ombor Majmuasi (A Toifa)</h3>
+                                        </div>
+                                    </div>
+                                    <!-- Boshqaruv tugmalari -->
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="toggleTourAutoPlay()" id="btn-tour-autoplay" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1 border border-slate-700">
+                                            <i data-lucide="play" class="w-3 h-3 text-emerald-400" id="tour-play-icon"></i>
+                                            <span id="tour-play-text">Avto: ON</span>
+                                        </button>
+                                        <button onclick="prevTourStep()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition text-xs flex items-center gap-1 font-semibold" title="Oldingi bekat">
+                                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                            <span class="hidden sm:inline">Oldingi</span>
+                                        </button>
+                                        <button onclick="nextTourStep()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition text-xs flex items-center gap-1 font-bold shadow" title="Keyingi bekat">
+                                            <span>Keyingi</span>
+                                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                        </button>
+                                        <button onclick="stopGuidedTour()" class="p-1.5 rounded-lg bg-rose-600/20 text-rose-300 hover:bg-rose-600 hover:text-white transition ml-1" title="Taqdimotni yakunlash">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed" id="tour-step-desc">
+                                    "TexnoLogistik" MChJ ning 4,000 m² maydonga ega zamonaviy "A" sinf taqsimot markazi. Shift balandligi 11.5 metr, tovar oqimlari U-simon (U-Flow) texnologiyasi bo'yicha to'qnashuvlarsiz tashkil etilgan.
+                                </p>
+                            </div>
 
                             <!-- 3D Heatmap Legendasi -->
                             <div id="heatmap-3d-legend" class="hidden absolute top-4 right-4 p-2.5 rounded-xl bg-slate-900/95 border border-amber-500/60 text-white text-[11px] space-y-1.5 shadow-2xl backdrop-blur z-20">
@@ -980,6 +1035,232 @@
                     </span>
                 </div>
             </div>
+
+            <!-- 🎯 WMS INTERAKTIV MARSHRUTLASH SIMULYATORI (PICKING ROUTING) -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-2">
+                            <i data-lucide="route" class="w-3.5 h-3.5"></i>
+                            <span>WMS Intellektual Marshrutlash Algoritmi</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900">Buyurtma Yig'ish (Picker Routing): S-Shape vs Standart Yo'l</h3>
+                        <p class="text-xs sm:text-sm text-slate-500">
+                            WMS tizimi operatorlarga ombor bo'ylab minimal masofa bosib o'tishlari uchun optimal yig'ish marshrutini generatsiya qiladi.
+                        </p>
+                    </div>
+
+                    <!-- Buyurtma stsenariylari tugmalari -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="setPickingScenario(1)" id="btn-pick-1" class="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow transition">
+                            Buyurtma #701 (Katta Texnika)
+                        </button>
+                        <button onclick="setPickingScenario(2)" id="btn-pick-2" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold transition">
+                            Buyurtma #702 (Aralash)
+                        </button>
+                        <button onclick="setPickingScenario(3)" id="btn-pick-3" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold transition">
+                            Buyurtma #703 (Mayda Texnika)
+                        </button>
+                        <button onclick="generateRandomPickingScenario()" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100 text-xs font-bold flex items-center gap-1 transition">
+                            <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
+                            <span>Tasodifiy Buyurtma</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Marshrut 2D Sxemasi (SVG interaktiv kanvasi) -->
+                    <div class="lg:col-span-8 bg-slate-950 p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+                        <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-800 pb-2">
+                            <span class="flex items-center gap-1.5 text-emerald-400 font-bold">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                S-Shape (Ilon izi) dinamik yig'ish traektoriyasi
+                            </span>
+                            <span class="font-mono text-slate-300" id="route-distance-badge">Bosib o'tish: 114 metr &bull; 4.2 daqiqa</span>
+                        </div>
+
+                        <!-- 2D Marshrut SVG Ko'rinishi -->
+                        <div class="w-full h-64 sm:h-72 relative flex items-center justify-center">
+                            <svg id="picking-svg" class="w-full h-full" viewBox="0 0 600 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Ombor yo'laklari va stellaj bloklari -->
+                                <rect x="30" y="20" width="540" height="200" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="2" />
+                                
+                                <!-- Stellaj bloklari -->
+                                <g fill="#1e293b" stroke="#334155" stroke-width="1.5">
+                                    <!-- A-Qator -->
+                                    <rect x="70" y="50" width="80" height="130" rx="4" />
+                                    <text x="110" y="120" fill="#94a3b8" font-size="11" font-weight="bold" text-anchor="middle">A-Qator</text>
+                                    
+                                    <!-- B-Qator -->
+                                    <rect x="200" y="50" width="80" height="130" rx="4" />
+                                    <text x="240" y="120" fill="#94a3b8" font-size="11" font-weight="bold" text-anchor="middle">B-Qator</text>
+                                    
+                                    <!-- C-Qator -->
+                                    <rect x="330" y="50" width="80" height="130" rx="4" />
+                                    <text x="370" y="120" fill="#94a3b8" font-size="11" font-weight="bold" text-anchor="middle">C-Qator</text>
+
+                                    <!-- Konsolli & Blok -->
+                                    <rect x="460" y="50" width="80" height="130" rx="4" />
+                                    <text x="500" y="120" fill="#94a3b8" font-size="11" font-weight="bold" text-anchor="middle">Konsol/MDA</text>
+                                </g>
+
+                                <!-- Boshlang'ich nuqta: Dispetcherlik -->
+                                <circle cx="50" cy="200" r="10" fill="#0284c7" />
+                                <text x="50" y="204" fill="#ffffff" font-size="9" font-weight="extrabold" text-anchor="middle">START</text>
+
+                                <!-- Tugash nuqtasi: Butlash / Staging -->
+                                <circle cx="550" cy="200" r="10" fill="#10b981" />
+                                <text x="550" y="204" fill="#ffffff" font-size="9" font-weight="extrabold" text-anchor="middle">FINISH</text>
+
+                                <!-- Marshrut yo'li (Dinamik SVG Path) -->
+                                <path id="svg-route-path" d="M 50 200 L 50 35 L 170 35 L 170 195 L 300 195 L 300 35 L 430 35 L 430 195 L 550 200" 
+                                      stroke="#10b981" stroke-width="3.5" stroke-dasharray="6 6" stroke-linecap="round" class="animate-pulse" />
+
+                                <!-- Yig'iladigan tovarlar nuqtalari (Waypoints) -->
+                                <g id="svg-waypoints-group">
+                                    <g transform="translate(60, 80)">
+                                        <circle cx="0" cy="0" r="8" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+                                        <text x="0" y="3" fill="#ffffff" font-size="8" font-weight="bold" text-anchor="middle">1</text>
+                                    </g>
+                                    <g transform="translate(180, 140)">
+                                        <circle cx="0" cy="0" r="8" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+                                        <text x="0" y="3" fill="#ffffff" font-size="8" font-weight="bold" text-anchor="middle">2</text>
+                                    </g>
+                                    <g transform="translate(310, 70)">
+                                        <circle cx="0" cy="0" r="8" fill="#3b82f6" stroke="#ffffff" stroke-width="2"/>
+                                        <text x="0" y="3" fill="#ffffff" font-size="8" font-weight="bold" text-anchor="middle">3</text>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- Taqqoslash natijasi -->
+                        <div class="grid grid-cols-3 gap-2 pt-2 text-center text-xs">
+                            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">Optimal Masofa (S-Shape):</span>
+                                <span class="font-bold text-emerald-400 text-sm" id="route-s-dist">114 metr</span>
+                            </div>
+                            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">Standart Yo'l (Unoptimized):</span>
+                                <span class="font-bold text-rose-400 text-sm" id="route-raw-dist">236 metr</span>
+                            </div>
+                            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">Vaqt va Kuch Tejamkorligi:</span>
+                                <span class="font-bold text-blue-400 text-sm" id="route-savings">+51.7% tejaldi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buyurtma tarkibi va WMS ro'yxati -->
+                    <div class="lg:col-span-4 bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-200 text-xs">
+                                <span class="font-bold text-slate-700">WMS Buyurtma Varaqasi (Pick List):</span>
+                                <span class="font-mono text-emerald-600 font-bold" id="pick-order-id">#ORD-9821</span>
+                            </div>
+
+                            <div class="mt-3 space-y-2.5 text-xs" id="pick-items-list">
+                                <div class="p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-5 h-5 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-[10px]">1</span>
+                                        <div>
+                                            <div class="font-bold text-slate-800">Smart TV Artel 43"</div>
+                                            <div class="text-[10px] text-slate-500 font-mono">Yacheyka: A-01-01-1 (1 dona)</div>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">Tayyor</span>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-[10px]">2</span>
+                                        <div>
+                                            <div class="font-bold text-slate-800">Mikroto'lqinli Pech Midea</div>
+                                            <div class="text-[10px] text-slate-500 font-mono">Yacheyka: B-03-02-1 (2 dona)</div>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">Tayyor</span>
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">3</span>
+                                        <div>
+                                            <div class="font-bold text-slate-800">Changyutgich Philips</div>
+                                            <div class="text-[10px] text-slate-500 font-mono">Yacheyka: B-04-03-2 (1 dona)</div>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">Tayyor</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[11px] text-blue-800 leading-snug">
+                            <span class="font-bold block mb-0.5">💡 Logistik Samaradorlik:</span>
+                            WMS S-Shape marshruti operator yo'laklar bo'ylab faqat bitta yo'nalishda harakatlanib, orqaga qaytishlar (Backtracking) sonini nolga tushiradi.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 💻 ANYLOGIC SIMULYATSION MODELI INTEGRATSIYASI KARTASI -->
+            <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white border border-indigo-900 shadow-xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-indigo-900/80">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 font-extrabold text-xl">
+                            AL
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xl font-extrabold text-white">AnyLogic 8 Simulyatsion Modeli Integratsiyasi</h3>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">.ALP Model Tayyor</span>
+                            </div>
+                            <p class="text-xs text-indigo-300">Diskret-voqeaviy (Discrete-Event) va Agentli (Agent-Based) omborxona simulyatsiyasi</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <a href="Ombor logistikasi.alp" download="Ombor_logistikasi_TexnoLogistik.alp" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition transform active:scale-95">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>AnyLogic Modelini Yuklab Olish (.alp)</span>
+                        </a>
+                        <a href="Simulyatsion_Loyiha_TexnoLogistik_Omborxona.md" target="_blank" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs flex items-center gap-1.5 transition">
+                            <i data-lucide="book-open" class="w-4 h-4"></i>
+                            <span>Ilmiy Hisobot</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="p-4 rounded-2xl bg-slate-900/80 border border-indigo-900/60 space-y-2">
+                        <div class="flex items-center justify-between text-indigo-400 font-bold">
+                            <span>Material Handling Library (MHL)</span>
+                            <i data-lucide="cpu" class="w-4 h-4"></i>
+                        </div>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            AnyLogic kutubxonasi yordamida forklift va reach-truck texnikalarining ombor yo'laklaridagi haqiqiy tezligi (12 km/soat), burilish radiuslari va to'siqlarni aylanib o'tish dinamikasi to'liq modellashtirilgan.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-900/80 border border-indigo-900/60 space-y-2">
+                        <div class="flex items-center justify-between text-emerald-400 font-bold">
+                            <span>Puasson Oqimi (Stochastic Arrival)</span>
+                            <i data-lucide="truck" class="w-4 h-4"></i>
+                        </div>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Furalarning rampaga yetib kelishi tasodifiy Puasson taqsimoti ($\lambda = 1.375\text{ fura/soat}$) asosida simulyatsiya qilingan bo'lib, rampa navbatlari (Dock Queues) hosil bo'lishining oldi olingan.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-900/80 border border-indigo-900/60 space-y-2">
+                        <div class="flex items-center justify-between text-amber-400 font-bold">
+                            <span>MHE Resurs Yuklamasi (78.4%)</span>
+                            <i data-lucide="battery-charging" class="w-4 h-4"></i>
+                        </div>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Simulyatsiya tajribasi natijasida 3 ta reach-truck va 2 ta forkliftning optimal yuklama koeffitsiyenti 78.4% ekanligi isbotlandi, bu esa bo'sh turib qolish va ortiqcha xarajatlarni 22% ga kamaytiradi.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- 3 & 4-MODUL: XAVFSIZLIK VA EKOLOGIYA (HSE & GREEN LOGISTICS) -->
@@ -1540,7 +1821,141 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 📥 RASMIY EKSPORT VA HISOBOTLARNI YUKLAB OLISH BLOKI -->
+            <div class="rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 p-6 sm:p-8 text-white border border-blue-700/60 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="space-y-2 text-center md:text-left">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-400/30">
+                        <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                        <span>Rasmiy Hisobot va Taqdimot Paketi</span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-white">Loyiha Texnik-Iqtisodiy Tahlilini Eksport Qilish</h3>
+                    <p class="text-xs sm:text-sm text-blue-200/80 max-w-2xl">
+                        Kalkulyator parametrlari, zonal maydonlar balansi, MHE parki va moliyaviy ko'rsatkichlarni (CAPEX, OPEX, Payback) tayyor A4 PDF va Excel (.csv) formatida yuklab oling.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <button onclick="openProjectPdfReport()" class="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-blue-600/30 flex items-center gap-2 transition transform active:scale-95">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                        <span>PDF Hisobot (A4 Ko'rish / Chop Etish)</span>
+                    </button>
+                    <button onclick="exportKpiCsv()" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs sm:text-sm border border-slate-700 flex items-center gap-2 transition transform active:scale-95">
+                        <i data-lucide="table" class="w-4 h-4 text-emerald-400"></i>
+                        <span>Excel / CSV Eksport</span>
+                    </button>
+                </div>
+            </div>
         </section>
+
+        <!-- 📄 FORMAL PDF / CHOP ETISH MODALI (EXECUTIVE SUMMARY REPORT) -->
+        <div id="report-modal-backdrop" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+            <div class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-10 shadow-2xl border border-slate-200 text-slate-800 space-y-6 max-h-[92vh] overflow-y-auto">
+                <!-- Modal Boshqaruv Ustki Qismi -->
+                <div class="flex items-center justify-between pb-4 border-b border-slate-200 no-print">
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                        <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i>
+                        <span>AKADEMIK VA BOSHQARUV HISOBOTI &middot; A4 FORMAT</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 shadow transition">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            <span>Chop Etish / PDF Saqlash</span>
+                        </button>
+                        <button onclick="closeProjectPdfReport()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hisobotning Rasmiy A4 Sahifasi -->
+                <div class="space-y-6 text-left" id="printable-report-content">
+                    <!-- Sarlavha -->
+                    <div class="text-center pb-4 border-b-2 border-slate-900 space-y-1">
+                        <span class="text-[11px] uppercase tracking-wider font-bold text-slate-500 block">Toshkent Davlat Transport Universiteti &middot; Logistika Kafedrasi</span>
+                        <h1 class="text-2xl font-black text-slate-900 uppercase">"TexnoLogistik" MChJ Taqsimot Markazi Texnik-Iqtisodiy Hisoboti</h1>
+                        <p class="text-xs text-slate-600">4,000 m² "A" toifali zamonaviy omborni tashkil etish, U-flow boshqaruvi va simulyatsiya tahlili</p>
+                    </div>
+
+                    <!-- 1. Zonal taqsimot jadvali -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">1. Ombor Maydoni va Zonal Taqsimot Balansi</h4>
+                        <table class="w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
+                            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-2 text-left">Funksional Zona Nomi</th>
+                                    <th class="p-2 text-center">Ulush (%)</th>
+                                    <th class="p-2 text-center">Hisoblangan Maydon (m²)</th>
+                                    <th class="p-2 text-left">Asosiy Texnologik Jihozlar</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-700">
+                                <tr><td class="p-2 font-bold">Qabul Qilish (Inbound)</td><td class="p-2 text-center">12%</td><td class="p-2 text-center font-mono font-bold" id="rep-receiving-m2">480 m²</td><td class="p-2">4 ta dokleveller, Toyota forklift, GS1 skaner</td></tr>
+                                <tr><td class="p-2 font-bold">Asosiy Saqlash (Storage)</td><td class="p-2 text-center">55%</td><td class="p-2 text-center font-mono font-bold" id="rep-storage-m2">2,200 m²</td><td class="p-2">5-yarusli frontal stellajlar, 3 ta Reach-truck</td></tr>
+                                <tr><td class="p-2 font-bold">Buyurtma Yig'ish (Picking)</td><td class="p-2 text-center">15%</td><td class="p-2 text-center font-mono font-bold" id="rep-picking-m2">600 m²</td><td class="p-2">Carton Flow rolikli tokchalar, ring-skanerlar</td></tr>
+                                <tr><td class="p-2 font-bold">Jo'natish & Ekspeditsiya</td><td class="p-2 text-center">11%</td><td class="p-2 text-center font-mono font-bold" id="rep-shipping-m2">440 m²</td><td class="p-2">Dok 5-8, Staging lanes, UHF RFID portallar</td></tr>
+                                <tr><td class="p-2 font-bold">Ma'muriy-Texnik & Servis</td><td class="p-2 text-center">9%</td><td class="p-2 text-center font-mono font-bold" id="rep-admin-m2">360 m²</td><td class="p-2">WMS server, zaryadlash stansiyasi, RMA diagnostika</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 2. Asosiy ko'rsatkichlar kartochkalari -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <span class="text-slate-500 block text-[10px]">Umumiy Sig'im:</span>
+                            <span class="font-black text-slate-900 text-sm" id="rep-capacity">3,400 pallet o'rni</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <span class="text-slate-500 block text-[10px]">Kunlik Aylanma:</span>
+                            <span class="font-black text-slate-900 text-sm" id="rep-flow">240 pallet (11 fura)</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <span class="text-slate-500 block text-[10px]">MHE Parki:</span>
+                            <span class="font-black text-slate-900 text-sm">8 elektro-texnika + 6 rokla</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <span class="text-slate-500 block text-[10px]">Shtat soni:</span>
+                            <span class="font-black text-slate-900 text-sm">31 nafar xodim</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Moliyaviy va Iqtisodiy Tahlil -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">2. Moliyaviy Baholash va Investitsiya Qoplanishi</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+                                <span class="text-blue-700 block text-[10px] font-bold uppercase">Dastlabki Investitsiya (CAPEX):</span>
+                                <span class="text-lg font-black text-blue-900" id="rep-capex">$870,000</span>
+                                <p class="text-[10px] text-blue-700/80 mt-0.5">Bino, stellajlar, MHE xaridi va WMS integratsiyasi</p>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                                <span class="text-emerald-700 block text-[10px] font-bold uppercase">Yillik Tejamkorlik (Savings):</span>
+                                <span class="text-lg font-black text-emerald-900" id="rep-savings">$340,000 / yil</span>
+                                <p class="text-[10px] text-emerald-700/80 mt-0.5">Avtomatlashtirish, nol nobudgarchilik va quyosh energiyasi</p>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-purple-50 border border-purple-200">
+                                <span class="text-purple-700 block text-[10px] font-bold uppercase">O'zini Oqlash Muddati (Payback):</span>
+                                <span class="text-lg font-black text-purple-900" id="rep-payback">2.56 Yil</span>
+                                <p class="text-[10px] text-purple-700/80 mt-0.5">2 yil 7 oyda investitsiya to'liq qoplanadi</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. KPI va Xulosa -->
+                    <div class="p-4 rounded-xl bg-slate-100 border border-slate-200 space-y-1.5 text-xs">
+                        <span class="font-bold text-slate-800 block">Xulosa va Tavsiyalar:</span>
+                        <p class="text-slate-600 leading-relaxed text-[11px]">
+                            Loyihalashtirilgan 4,000 m² taqsimot markazi "A" toifasidagi standartlarga to'liq javob beradi. U-flow tovar oqimi va ABC-XYZ slotting tizimi tufayli buyurtma sikli 42 daqiqagacha qisqartirildi, OTIF ko'rsatkichi 98.7% darajasida ta'minlandi. AnyLogic simulyatsiyasi va 3D WebGL modeli loyihaning amaliy hayotiyligini to'liq isbotladi.
+                        </p>
+                    </div>
+
+                    <div class="pt-4 flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-200">
+                        <span>Hujjat sanasi: 2026-yil &middot; TexnoLogistik MChJ Logistika Markazi</span>
+                        <span>Loyiha muallifi: <strong class="text-slate-800">Saidislom Niyozov (@saidislom_niyozov)</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </main>
 
@@ -1554,7 +1969,9 @@
                     </div>
                     <div>
                         <span class="text-white font-bold text-sm">"TexnoLogistik" MChJ Simulyatsion Taqsimot Markazi (2D & 3D)</span>
-                        <p class="text-slate-500 text-[11px]">"Omborxona Logistikasi" fani bo'yicha mustaqil loyiha ishi</p>
+                        <p class="text-slate-400 text-[11px]">
+                            "Omborxona Logistikasi" fani bo'yicha mustaqil loyiha ishi &middot; Muallif: <span class="font-bold text-blue-400">Saidislom Niyozov</span> (<span class="text-slate-300 font-mono">@saidislom_niyozov</span>)
+                        </p>
                     </div>
                 </div>
 
@@ -2142,13 +2559,38 @@
 
         let dynamicReachTruck = null;
         let dynamicForkCarriage = null;
+        let dynamicInboundForklift = null;
+        let dynamicOutboundJack = null;
+        let mheSimulationActive = true;
+
+        function toggleMheSimulation() {
+            mheSimulationActive = !mheSimulationActive;
+            const btn = document.getElementById('btn-toggle-sim');
+            const text = document.getElementById('sim-btn-text');
+            const icon = document.getElementById('sim-icon');
+            if (mheSimulationActive) {
+                if (text) text.innerText = 'Harakat: ON';
+                if (btn) btn.className = 'px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white transition font-semibold flex items-center gap-1 border border-emerald-500/30';
+                if (icon) icon.className = 'w-3.5 h-3.5';
+            } else {
+                if (text) text.innerText = 'Harakat: PAUZA';
+                if (btn) btn.className = 'px-2.5 py-1 rounded bg-amber-600/30 text-amber-300 hover:bg-amber-600 hover:text-white transition font-semibold flex items-center gap-1 border border-amber-500/50';
+                if (icon) icon.className = 'w-3.5 h-3.5 text-amber-300';
+            }
+        }
 
         function buildHandlingEquipment() {
-            // A-Qator bo'ylab harakatlanuvchi jonli Reach-truck
+            // 1. A-Qator bo'ylab harakatlanuvchi Reach-truck (Baland yaruslarga ko'tarish)
             dynamicReachTruck = buildForklift(-11, 0, -2, 0xfacc15, 9.5, true);
-            buildForklift(10, 0, 5, 0xfacc15, 6);
-            buildForklift(-34, 0, -12, 0xea580c, 2.5);
-            buildForklift(36, 0, -6, 0x0284c7, 2);
+            
+            // 2. Qabul qilish doklari va bufer orasi qatnovchi elektr Toyota Forklift
+            dynamicInboundForklift = buildForklift(-37, 0, -18, 0xea580c, 3.2);
+
+            // 3. Butlash va Jo'natish doklari orasi qatnovchi elektr Still platformali aravacha
+            dynamicOutboundJack = buildForklift(35, 0, 0, 0x0284c7, 2.0);
+
+            // Qo'shimcha statik zaxira texnikalar
+            buildForklift(10, 0, 5, 0xfacc15, 6.0);
         }
 
         function buildForklift(x, y, z, color, mastHeight, isDynamic = false) {
@@ -2331,7 +2773,7 @@
         function animate3D() {
             animId3D = requestAnimationFrame(animate3D);
 
-            // Zarrachalar harakati
+            // Zarrachalar harakati (U-flow yo'lagi bo'ylab)
             flowParticles.forEach(p => {
                 p.progress += 0.0035;
                 if (p.progress > 1) p.progress = 0;
@@ -2339,12 +2781,31 @@
                 p.mesh.position.copy(pos);
             });
 
-            // Dinamik Reach-truck harakati va vilkani ko'tarish kinematikasi
-            if (dynamicReachTruck) {
+            // Dinamik MHE texnikalari harakati va kinematikasi
+            if (mheSimulationActive) {
                 const t = Date.now() * 0.001;
-                dynamicReachTruck.position.z = -1 + Math.sin(t * 0.8) * 8.5;
-                if (dynamicForkCarriage) {
-                    dynamicForkCarriage.position.y = 1.0 + Math.abs(Math.sin(t * 1.3)) * 5.2;
+
+                // 1. A-Qatordagi Reach-truck harakati va vilkani ko'tarish kinematikasi
+                if (dynamicReachTruck) {
+                    dynamicReachTruck.position.z = -1 + Math.sin(t * 0.75) * 8.5;
+                    if (dynamicForkCarriage) {
+                        dynamicForkCarriage.position.y = 1.0 + Math.abs(Math.sin(t * 1.2)) * 5.2;
+                    }
+                }
+
+                // 2. Qabul qilish doki va bufer orasi harakatlanuvchi Forklift
+                if (dynamicInboundForklift) {
+                    const inboundCycle = (Math.sin(t * 0.6) + 1) / 2; // 0 dan 1 gacha
+                    dynamicInboundForklift.position.x = -37 + inboundCycle * 12;
+                    dynamicInboundForklift.position.z = -19 + inboundCycle * 10;
+                    // Harakat yo'nalishiga qarab burilish
+                    dynamicInboundForklift.rotation.y = Math.cos(t * 0.6) > 0 ? 0.7 : -2.4;
+                }
+
+                // 3. Butlash va Jo'natish doki orasi qatnovchi elektr aravacha
+                if (dynamicOutboundJack) {
+                    dynamicOutboundJack.position.z = -4 + Math.sin(t * 0.85) * 11;
+                    dynamicOutboundJack.rotation.y = Math.cos(t * 0.85) > 0 ? 0 : Math.PI;
                 }
             }
 
@@ -2380,6 +2841,176 @@
         }
 
         window.addEventListener('resize', on3DResize);
+
+        function toggle3DFullscreen() {
+            const box = document.getElementById('warehouse-3d-box');
+            if (!box) return;
+            if (!document.fullscreenElement) {
+                if (box.requestFullscreen) {
+                    box.requestFullscreen();
+                } else if (box.webkitRequestFullscreen) {
+                    box.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+            setTimeout(on3DResize, 200);
+        }
+
+        // ==========================================
+        // 🎬 VIRTUAL TAQDIMOT VA GUIDED TOUR MOTORASI
+        // ==========================================
+        let tourActive = false;
+        let tourStepIndex = 0;
+        let tourAutoPlay = true;
+        let tourTimer = null;
+
+        const tourSteps = [
+            {
+                title: "1. Umumiy Taqsimot Majmuasi (A Toifa)",
+                desc: "\"TexnoLogistik\" MChJ ning 4,000 m² maydonga ega regional taqsimot markazi. Shift balandligi 11.5 metr, foydali hajm 46,000 m³. Tovar oqimlari U-simon (U-Flow) texnologiyasi bo'yicha yo'naltirilgan bo'lib, kiruvchi va chiquvchi oqimlar hech qachon to'qnashmaydi.",
+                camPos: { x: -75, y: 65, z: 80 },
+                lookAt: { x: 0, y: 0, z: 0 },
+                zone: null,
+                duration: 8500
+            },
+            {
+                title: "2. Qabul Qilish Doklari (Inbound)",
+                desc: "Dok 1 — 4 darvozalari. Gidravlik doklevellerlar furalar balandligiga avtomat moslashadi. Kuniga 11 ta og'ir fura (120-156 t/kun) qabul qilinadi. GS1-128 shtrix-kod va seriya raqamlari (IMEI) to'g'ridan-to'g'ri WMS tizimiga kirim qilinadi.",
+                camPos: { x: -48, y: 16, z: -38 },
+                lookAt: { x: -35, y: 2, z: -18 },
+                zone: 'receiving',
+                duration: 8500
+            },
+            {
+                title: "3. Asosiy Saqlash va Oltin Zona (A-Toifa)",
+                desc: "5 yarusli ko'p qavatli frontal stellajlar (3,400 pallet o'rni). Jungheinrich Reach-truck texnikalari 10.5 m balandlikkacha yuk ko'taradi. ABC tahlili bo'yicha eng xaridorgir A-toifadagi Smart TV va muzlatkichlar rampaga eng yaqin 1-2 yaruslarga joylashtirilgan.",
+                camPos: { x: -28, y: 14, z: 12 },
+                lookAt: { x: -16, y: 5, z: -2 },
+                zone: 'storage',
+                duration: 8500
+            },
+            {
+                title: "4. Buyurtma Yig'ish va Butlash (Picking)",
+                desc: "Gravitatsion Carton Flow tokchalari va mayda texnikalar hududi. WMS tizimi S-Shape (ilon izi) algoritmi bo'yicha operator yo'lini 51.7% ga qisqartiradi. Ring-skanerlar yordamida qog'ozsiz va xatosiz komplektatsiya ta'minlanadi.",
+                camPos: { x: 48, y: 16, z: 22 },
+                lookAt: { x: 34, y: 2, z: 6 },
+                zone: 'picking',
+                duration: 8500
+            },
+            {
+                title: "5. Jo'natish va Ekspeditsiya (Outbound)",
+                desc: "Dok 5 — 8 darvozalari. Marshrutlar bo'yicha ajratilgan Staging lanes (Toshkent, Vodiy, Janub, G'arb). UHF RFID portallari yuk ortilayotganda barcha palletlarni 0.5 soniyada avtomatik ro'yxatdan o'tkazadi va yuk xati shakllantiriladi.",
+                camPos: { x: 50, y: 16, z: -36 },
+                lookAt: { x: 35, y: 2, z: -16 },
+                zone: 'shipping',
+                duration: 8500
+            },
+            {
+                title: "6. HSE Xavfsizlik va Yashil Energiya",
+                desc: "Shift tagida to'liq ESFR sprinkler yong'in o'chirish quvurlari va pol sathida Blue Safety Spot nurli proyeksiyalari o'rnatilgan. Bino tomidagi 180 kVt quyosh panellari omborni toza energiya bilan ta'minlaydi va yiliga 94 tonna CO2 kamaytiradi.",
+                camPos: { x: 0, y: 32, z: 48 },
+                lookAt: { x: 0, y: 6, z: 0 },
+                zone: 'hse',
+                duration: 9000
+            }
+        ];
+
+        function startGuidedTour() {
+            tourActive = true;
+            tourStepIndex = 0;
+            setViewMode('3d');
+
+            const container = document.getElementById('container-3d-view');
+            if (container) container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            autoRotate3D = false;
+            const btnRotate = document.getElementById('btn-toggle-rotate');
+            if (btnRotate) {
+                btnRotate.classList.remove('text-emerald-400');
+                btnRotate.classList.add('text-slate-400');
+            }
+
+            const overlay = document.getElementById('guided-tour-overlay');
+            if (overlay) overlay.classList.remove('hidden');
+
+            renderCurrentTourStep();
+        }
+
+        function renderCurrentTourStep() {
+            if (!tourActive) return;
+            const step = tourSteps[tourStepIndex];
+            if (!step) return;
+
+            document.getElementById('tour-step-badge').innerText = `${tourStepIndex + 1}/${tourSteps.length}`;
+            document.getElementById('tour-step-title').innerText = step.title;
+            document.getElementById('tour-step-desc').innerText = step.desc;
+
+            // HSE qatlamini 6-qadamda yoqish
+            if (step.zone === 'hse') {
+                if (hseGroup) hseGroup.visible = true;
+            } else if (hseGroup && !hseActive) {
+                hseGroup.visible = false;
+            }
+
+            // Kamerani silliq ko'chirish
+            const targetCam = new THREE.Vector3(step.camPos.x, step.camPos.y, step.camPos.z);
+            const targetLook = new THREE.Vector3(step.lookAt.x, step.lookAt.y, step.lookAt.z);
+            smoothCameraMove(targetCam, targetLook, 1500);
+
+            // Avto-pleyer taymeri
+            if (tourTimer) clearTimeout(tourTimer);
+            if (tourAutoPlay) {
+                tourTimer = setTimeout(() => {
+                    if (tourActive && tourAutoPlay) {
+                        nextTourStep();
+                    }
+                }, step.duration);
+            }
+        }
+
+        function nextTourStep() {
+            if (tourStepIndex < tourSteps.length - 1) {
+                tourStepIndex++;
+            } else {
+                tourStepIndex = 0; // Tsiklli qaytish
+            }
+            renderCurrentTourStep();
+        }
+
+        function prevTourStep() {
+            if (tourStepIndex > 0) {
+                tourStepIndex--;
+            } else {
+                tourStepIndex = tourSteps.length - 1;
+            }
+            renderCurrentTourStep();
+        }
+
+        function toggleTourAutoPlay() {
+            tourAutoPlay = !tourAutoPlay;
+            const text = document.getElementById('tour-play-text');
+            const icon = document.getElementById('tour-play-icon');
+            if (tourAutoPlay) {
+                if (text) text.innerText = 'Avto: ON';
+                if (icon) icon.className = 'w-3 h-3 text-emerald-400';
+                renderCurrentTourStep();
+            } else {
+                if (text) text.innerText = 'Avto: OFF';
+                if (icon) icon.className = 'w-3 h-3 text-slate-400';
+                if (tourTimer) clearTimeout(tourTimer);
+            }
+        }
+
+        function stopGuidedTour() {
+            tourActive = false;
+            if (tourTimer) clearTimeout(tourTimer);
+            const overlay = document.getElementById('guided-tour-overlay');
+            if (overlay) overlay.classList.add('hidden');
+            if (hseGroup && !hseActive) hseGroup.visible = false;
+        }
 
         function setCameraView(viewType) {
             autoRotate3D = false;
@@ -2830,6 +3461,190 @@
         }
         setInterval(updateIotTelemetry, 3500);
 
+        // ==========================================
+        // 8. WMS S-SHAPE PICKING MARSHRUTI MANTIQI
+        // ==========================================
+        const pickingScenarios = {
+            1: {
+                id: "#ORD-701",
+                sDist: "114 metr",
+                rawDist: "236 metr",
+                savings: "+51.7% tejaldi",
+                badgeText: "Bosib o'tish: 114 metr • 4.2 daqiqa",
+                svgPath: "M 50 200 L 50 35 L 170 35 L 170 195 L 300 195 L 300 35 L 430 35 L 430 195 L 550 200",
+                waypoints: [
+                    { x: 50, y: 80, num: "1", color: "#ef4444" },
+                    { x: 170, y: 140, num: "2", color: "#f59e0b" },
+                    { x: 300, y: 70, num: "3", color: "#3b82f6" }
+                ],
+                items: [
+                    { name: 'Smart TV Artel 43" Full HD', code: "A-01-01-1 (1 dona)", color: "rose" },
+                    { name: "Samsung No-Frost Muzlatkich", code: "P-02-01-1 (1 dona)", color: "amber" },
+                    { name: "Artel Kir Yuvish Mashinasi 7kg", code: "P-01-01-2 (1 dona)", color: "blue" }
+                ]
+            },
+            2: {
+                id: "#ORD-702",
+                sDist: "96 metr",
+                rawDist: "192 metr",
+                savings: "+50.0% tejaldi",
+                badgeText: "Bosib o'tish: 96 metr • 3.5 daqiqa",
+                svgPath: "M 50 200 L 50 40 L 170 40 L 170 180 L 300 180 L 300 120 L 550 200",
+                waypoints: [
+                    { x: 50, y: 95, num: "1", color: "#ef4444" },
+                    { x: 170, y: 65, num: "2", color: "#f59e0b" },
+                    { x: 300, y: 150, num: "3", color: "#10b981" }
+                ],
+                items: [
+                    { name: "Mikroto'lqinli Pech Midea 20L", code: "B-03-02-1 (2 dona)", color: "rose" },
+                    { name: "LG Inverter 12-Split Konditsioner", code: "A-02-02-2 (1 dona)", color: "amber" },
+                    { name: "Elektr Choynak Tefal 1.7L", code: "B-02-01-3 (4 dona)", color: "emerald" }
+                ]
+            },
+            3: {
+                id: "#ORD-703",
+                sDist: "78 metr",
+                rawDist: "165 metr",
+                savings: "+52.7% tejaldi",
+                badgeText: "Bosib o'tish: 78 metr • 2.8 daqiqa",
+                svgPath: "M 50 200 L 170 200 L 170 45 L 300 45 L 300 180 L 550 200",
+                waypoints: [
+                    { x: 170, y: 80, num: "1", color: "#f59e0b" },
+                    { x: 170, y: 140, num: "2", color: "#f59e0b" },
+                    { x: 300, y: 100, num: "3", color: "#3b82f6" }
+                ],
+                items: [
+                    { name: "Changyutgich Philips PowerPro", code: "B-04-03-2 (1 dona)", color: "amber" },
+                    { name: "Elektr Choynak Tefal 1.7L", code: "B-02-01-3 (3 dona)", color: "amber" },
+                    { name: "Moyli Isitgich Polaris 9-seksiya", code: "B-05-02-1 (1 dona)", color: "blue" }
+                ]
+            }
+        };
+
+        function setPickingScenario(scenarioId) {
+            [1, 2, 3].forEach(id => {
+                const b = document.getElementById('btn-pick-' + id);
+                if (b) {
+                    if (id === scenarioId) {
+                        b.className = "px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow transition";
+                    } else {
+                        b.className = "px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold transition";
+                    }
+                }
+            });
+            renderPickingScenario(pickingScenarios[scenarioId]);
+        }
+
+        function generateRandomPickingScenario() {
+            const randomId = Math.floor(Math.random() * 3) + 1;
+            setPickingScenario(randomId);
+        }
+
+        function renderPickingScenario(sc) {
+            if (!sc) return;
+            document.getElementById('pick-order-id').innerText = sc.id;
+            document.getElementById('route-distance-badge').innerText = sc.badgeText;
+            document.getElementById('route-s-dist').innerText = sc.sDist;
+            document.getElementById('route-raw-dist').innerText = sc.rawDist;
+            document.getElementById('route-savings').innerText = sc.savings;
+
+            const pathEl = document.getElementById('svg-route-path');
+            if (pathEl) pathEl.setAttribute('d', sc.svgPath);
+
+            const wpGroup = document.getElementById('svg-waypoints-group');
+            if (wpGroup) {
+                wpGroup.innerHTML = '';
+                sc.waypoints.forEach(wp => {
+                    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    g.setAttribute('transform', `translate(${wp.x}, ${wp.y})`);
+                    g.innerHTML = `
+                        <circle cx="0" cy="0" r="9" fill="${wp.color}" stroke="#ffffff" stroke-width="2"/>
+                        <text x="0" y="3.5" fill="#ffffff" font-size="9" font-weight="extrabold" text-anchor="middle">${wp.num}</text>
+                    `;
+                    wpGroup.appendChild(g);
+                });
+            }
+
+            const listEl = document.getElementById('pick-items-list');
+            if (listEl) {
+                listEl.innerHTML = '';
+                sc.items.forEach((item, idx) => {
+                    const div = document.createElement('div');
+                    div.className = "p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-between";
+                    div.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-${item.color}-100 text-${item.color}-700 flex items-center justify-center font-bold text-[10px]">${idx + 1}</span>
+                            <div>
+                                <div class="font-bold text-slate-800">${item.name}</div>
+                                <div class="text-[10px] text-slate-500 font-mono">Yacheyka: ${item.code}</div>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">Tayyor</span>
+                    `;
+                    listEl.appendChild(div);
+                });
+            }
+        }
+
+        // ==========================================
+        // 9. PDF HISOBOT MODALI VA EXCEL CSV EKSPORT
+        // ==========================================
+        function openProjectPdfReport() {
+            // Kalkulyator qiymatlarini rasmiy hisobotga sinxronlash
+            document.getElementById('rep-receiving-m2').innerText = document.getElementById('calc-receiving').innerText;
+            document.getElementById('rep-storage-m2').innerText = document.getElementById('calc-storage').innerText;
+            document.getElementById('rep-picking-m2').innerText = document.getElementById('calc-picking').innerText;
+            document.getElementById('rep-shipping-m2').innerText = document.getElementById('calc-shipping').innerText;
+            document.getElementById('rep-admin-m2').innerText = document.getElementById('calc-admin').innerText;
+            document.getElementById('rep-capacity').innerText = document.getElementById('calc-capacity').innerText + " pallet o'rni";
+            document.getElementById('rep-flow').innerText = document.getElementById('input-flow').value + " pallet/kun";
+            document.getElementById('rep-capex').innerText = document.getElementById('calc-capex').innerText;
+            document.getElementById('rep-payback').innerText = document.getElementById('calc-payback').innerText;
+
+            const backdrop = document.getElementById('report-modal-backdrop');
+            if (backdrop) backdrop.classList.remove('hidden');
+        }
+
+        function closeProjectPdfReport() {
+            const backdrop = document.getElementById('report-modal-backdrop');
+            if (backdrop) backdrop.classList.add('hidden');
+        }
+
+        function exportKpiCsv() {
+            const area = document.getElementById('input-area').value;
+            const flow = document.getElementById('input-flow').value;
+            const tiers = document.getElementById('input-tiers').value;
+            const capacity = document.getElementById('calc-capacity').innerText;
+            const capex = document.getElementById('calc-capex').innerText;
+            const payback = document.getElementById('calc-payback').innerText;
+            const costPerPallet = document.getElementById('cost-per-pallet').innerText;
+            const monthlyOpex = document.getElementById('cost-total-monthly').innerText;
+
+            let csv = "\uFEFFKo'rsatkich Nomi,Qiymati,O'lchov Birligi,Izoh / Standart\r\n";
+            csv += `"Umumiy Ombor Maydoni","${area}","m²","100m x 40m 'A' Sinfiga mos bino"\r\n`;
+            csv += `"Shift Balandligi","11.5","metr","Foydali hajm: 46,000 m³"\r\n`;
+            csv += `"Stellaj Yarusi","${tiers}","yarus","Frontal selektiv ko'p qavatli stellajlar"\r\n`;
+            csv += `"Umumiy Pallet Sig'imi","${capacity}","pallet o'rni","3,400 taglik o'rni (EUR 1200x800)"\r\n`;
+            csv += `"Kunlik Yuk Oqimi","${flow}","pallet/kun","120 - 156 t/kun yuk aylanmasi"\r\n`;
+            csv += `"Dastlabki Investitsiya (CAPEX)","${capex}","USD","Bino, stellaj, 8 ta MHE va WMS IT"\r\n`;
+            csv += `"O'zini Oqlash Muddati (Payback)","${payback}","yil","Dinamik tejamkorlik hisobida"\r\n`;
+            csv += `"1 ta Pallet Saqlash Oylik Xarajati","${costPerPallet}","USD/oy","Ijarachi va distribyutor tannarxi"\r\n`;
+            csv += `"Jami Oylik OPEX (4,000 m²)","${monthlyOpex}","USD/oy","Ish haqi, lizing, kommunal va IT"\r\n`;
+            csv += `"OTIF Yetkazib Berish Sifati","98.7","%","On-Time In-Full ko'rsatkichi"\r\n`;
+            csv += `"Buyurtma Butlash Sikli (OFCT)","42","daqiqa","WMS to'lqinli yig'ish hisobiga"\r\n`;
+            csv += `"Inventarizatsiya Aniqligi (IRA)","99.85","%","GS1-128 va RFID portallari orqali"\r\n`;
+            csv += `"Quyosh PV Quvvati","180","kVt","Yiliga 94 tonna CO2 kamayishi"\r\n`;
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "TexnoLogistik_KPI_va_Iqtisodiy_Korsatkichlar.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         // Dasturni ishga tushirish
         window.addEventListener('DOMContentLoaded', () => {
             renderSkuTable();
@@ -2837,6 +3652,7 @@
             calculateWarehouse();
             calculateGreenLogistics();
             calculateStorageCost();
+            setPickingScenario(1);
             init3DScene();
         });
     </script>
