@@ -10,6 +10,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS CDN (Professional .xlsx Excel hisobot yaratish uchun) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Three.js va OrbitControls (3D Vizualizatsiya uchun) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -1770,7 +1772,7 @@
                     </div>
                     <h3 class="text-xl sm:text-2xl font-extrabold text-white">Loyiha Texnik-Iqtisodiy Tahlilini Eksport Qilish</h3>
                     <p class="text-xs sm:text-sm text-blue-200/80 max-w-2xl">
-                        Kalkulyator parametrlari, zonal maydonlar balansi, MHE parki va moliyaviy ko'rsatkichlarni (CAPEX, OPEX, Payback) tayyor A4 PDF va Excel (.csv) formatida yuklab oling.
+                        Kalkulyator parametrlari, zonal maydonlar balansi, MHE parki va moliyaviy ko'rsatkichlarni (CAPEX, OPEX, Payback) tayyor A4 PDF va to'liq formatlangan Excel (.xlsx) jadvalida yuklab oling.
                     </p>
                 </div>
 
@@ -1779,9 +1781,9 @@
                         <i data-lucide="printer" class="w-4 h-4"></i>
                         <span>PDF Hisobot (A4 Ko'rish / Chop Etish)</span>
                     </button>
-                    <button onclick="exportKpiCsv()" class="px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs sm:text-sm border border-slate-700 flex items-center gap-2 transition transform active:scale-95">
-                        <i data-lucide="table" class="w-4 h-4 text-emerald-400"></i>
-                        <span>Excel / CSV Eksport</span>
+                    <button onclick="exportKpiExcel()" class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-emerald-600/30 flex items-center gap-2 transition transform active:scale-95">
+                        <i data-lucide="table" class="w-4 h-4"></i>
+                        <span>Excel Hisobot (.xlsx)</span>
                     </button>
                 </div>
             </div>
@@ -3549,40 +3551,77 @@
             if (backdrop) backdrop.classList.add('hidden');
         }
 
-        function exportKpiCsv() {
-            const area = document.getElementById('input-area').value;
-            const flow = document.getElementById('input-flow').value;
-            const tiers = document.getElementById('input-tiers').value;
-            const capacity = document.getElementById('calc-capacity').innerText;
-            const capex = document.getElementById('calc-capex').innerText;
-            const payback = document.getElementById('calc-payback').innerText;
-            const costPerPallet = document.getElementById('cost-per-pallet').innerText;
-            const monthlyOpex = document.getElementById('cost-total-monthly').innerText;
+        function exportKpiExcel() {
+            const area = document.getElementById('input-area') ? document.getElementById('input-area').value : '4000';
+            const flow = document.getElementById('input-flow') ? document.getElementById('input-flow').value : '240';
+            const tiers = document.getElementById('input-tiers') ? document.getElementById('input-tiers').value : '5';
+            const capacity = document.getElementById('calc-capacity') ? document.getElementById('calc-capacity').innerText : '3,399';
+            const capex = document.getElementById('calc-capex') ? document.getElementById('calc-capex').innerText : '$870 000';
+            const payback = document.getElementById('calc-payback') ? document.getElementById('calc-payback').innerText : '2.56';
+            const costPerPallet = document.getElementById('cost-per-pallet') ? document.getElementById('cost-per-pallet').innerText : '$12.94';
+            const monthlyOpex = document.getElementById('cost-total-monthly') ? document.getElementById('cost-total-monthly').innerText : '$44 000';
 
-            let csv = "\uFEFFKo'rsatkich Nomi,Qiymati,O'lchov Birligi,Izoh / Standart\r\n";
-            csv += `"Umumiy Ombor Maydoni","${area}","m²","100m x 40m 'A' Sinfiga mos bino"\r\n`;
-            csv += `"Shift Balandligi","11.5","metr","Foydali hajm: 46,000 m³"\r\n`;
-            csv += `"Stellaj Yarusi","${tiers}","yarus","Frontal selektiv ko'p qavatli stellajlar"\r\n`;
-            csv += `"Umumiy Pallet Sig'imi","${capacity}","pallet o'rni","3,400 taglik o'rni (EUR 1200x800)"\r\n`;
-            csv += `"Kunlik Yuk Oqimi","${flow}","pallet/kun","120 - 156 t/kun yuk aylanmasi"\r\n`;
-            csv += `"Dastlabki Investitsiya (CAPEX)","${capex}","USD","Bino, stellaj, 8 ta MHE va WMS IT"\r\n`;
-            csv += `"O'zini Oqlash Muddati (Payback)","${payback}","yil","Dinamik tejamkorlik hisobida"\r\n`;
-            csv += `"1 ta Pallet Saqlash Oylik Xarajati","${costPerPallet}","USD/oy","Ijarachi va distribyutor tannarxi"\r\n`;
-            csv += `"Jami Oylik OPEX (4,000 m²)","${monthlyOpex}","USD/oy","Ish haqi, lizing, kommunal va IT"\r\n`;
-            csv += `"OTIF Yetkazib Berish Sifati","98.7","%","On-Time In-Full ko'rsatkichi"\r\n`;
-            csv += `"Buyurtma Butlash Sikli (OFCT)","42","daqiqa","WMS to'lqinli yig'ish hisobiga"\r\n`;
-            csv += `"Inventarizatsiya Aniqligi (IRA)","99.85","%","GS1-128 va RFID portallari orqali"\r\n`;
-            csv += `"Quyosh PV Quvvati","180","kVt","Yiliga 94 tonna CO2 kamayishi"\r\n`;
+            const rows = [
+                ["TEXNOLOGISTIK MCHJ — OMBORXONA LOGISTIKASI VA KPI HISOBOTI", "", "", ""],
+                ["Loyiha Muallifi: Saidislom Niyozov (@saidislom_niyozov)", "", "", ""],
+                ["Sana: " + new Date().toLocaleDateString('uz-UZ'), "", "", ""],
+                ["Standart: 'A' toifali zamonaviy logistika taqsimot markazi", "", "", ""],
+                [],
+                ["Ko'rsatkich Nomi", "Qiymati", "O'lchov Birligi", "Izoh va Standart"],
+                ["Umumiy Ombor Maydoni (GFA)", area, "m²", "100m x 40m 'A' Sinfiga mos bino"],
+                ["Shift Balandligi (Clear Height)", "11.5", "metr", "Foydali hajm: 46,000 m³"],
+                ["Stellaj Tizimi Yarusi", tiers, "yarus", "Frontal selektiv ko'p qavatli stellajlar"],
+                ["Umumiy Pallet Sig'imi", capacity, "pallet o'rni", "EUR 1200x800 standart taglik o'rni"],
+                ["Kunlik Yuk Oqimi (Throughput)", flow, "pallet/kun", "120 - 156 t/kun yuk aylanmasi"],
+                ["Dastlabki Investitsiya (CAPEX)", capex, "USD", "Bino, stellaj, 8 ta MHE va WMS IT"],
+                ["O'zini Oqlash Muddati (Payback)", payback, "yil", "Dinamik tejamkorlik hisobida"],
+                ["1 ta Pallet Saqlash Oylik Xarajati", costPerPallet, "USD/oy", "Ijarachi va distribyutor tannarxi"],
+                ["Jami Oylik OPEX (4,000 m²)", monthlyOpex, "USD/oy", "Ish haqi, lizing, kommunal va IT"],
+                ["OTIF Yetkazib Berish Sifati", "98.7%", "%", "On-Time In-Full ko'rsatkichi"],
+                ["Buyurtma Butlash Sikli (OFCT)", "42", "daqiqa", "WMS to'lqinli yig'ish hisobiga"],
+                ["Inventarizatsiya Aniqligi (IRA)", "99.85%", "%", "GS1-128 va RFID portallari orqali"],
+                ["Quyosh PV Quvvati", "180", "kVt", "Yiliga 94 tonna CO2 kamayishi"],
+                ["ESG Yashil Energiya Ulushi", "42.5%", "%", "Omborning umumiy elektr iste'moli qoplanishi"]
+            ];
 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "TexnoLogistik_KPI_va_Iqtisodiy_Korsatkichlar.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            if (typeof XLSX !== 'undefined') {
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                ws['!cols'] = [
+                    { wch: 38 },
+                    { wch: 18 },
+                    { wch: 16 },
+                    { wch: 55 }
+                ];
+                XLSX.utils.book_append_sheet(wb, ws, "KPI Hisoboti");
+                XLSX.writeFile(wb, "Saidislom_TexnoLogistik_KPI_Hisobot.xlsx");
+            } else {
+                let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+                xml += '<?mso-application progid="Excel.Sheet"?>\n';
+                xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n';
+                xml += ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n';
+                xml += '<Styles><Style ss:ID="sHdr"><Font ss:Bold="1"/></Style></Styles>\n';
+                xml += '<Worksheet ss:Name="KPI Hisoboti">\n<Table>\n';
+                xml += '<Column ss:Width="240"/><Column ss:Width="100"/><Column ss:Width="90"/><Column ss:Width="300"/>\n';
+                rows.forEach((r, idx) => {
+                    xml += '<Row' + (idx === 5 ? ' ss:StyleID="sHdr"' : '') + '>';
+                    (r || []).forEach(c => {
+                        xml += '<Cell><Data ss:Type="String">' + String(c).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</Data></Cell>';
+                    });
+                    xml += '</Row>\n';
+                });
+                xml += '</Table>\n</Worksheet>\n</Workbook>';
+                const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Saidislom_TexnoLogistik_KPI_Hisobot.xls';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
         }
+        window.exportKpiCsv = exportKpiExcel;
 
         // Dasturni ishga tushirish
         window.addEventListener('DOMContentLoaded', () => {
